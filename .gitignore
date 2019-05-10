@@ -1,0 +1,23 @@
+# Ignore all logfiles and tempfiles.
+/log/*.log
+/tmp
+
+/.DS_Store
+/*/.DS_Store
+/*/*/.DS_Store
+/*/*/*/.DS_Store
+/*/*/*/*/.DS_Store
+/*/*/*/*/*/.DS_Store
+/.AppleDouble
+/*/.AppleDouble
+/*/*/.AppleDouble
+/*/*/*/*/.AppleDouble
+/*/*/*/*/*/.AppleDouble
+
+# configs
+/config/keys/app.key.rsa
+/config/keys/app.key.rsa.pub
+/config/app.yml
+/config/database.yml
+/config/email.yml
+/t

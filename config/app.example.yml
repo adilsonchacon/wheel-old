@@ -1,0 +1,8 @@
+app_name: "app name"
+frontend_base_url: "https://example.com"
+secret_key: "secret key"
+reset_password_expiration_seconds: 172800
+token_expiration_seconds: 7200
+locales:
+  - "en"
+  - "pt-BR"
