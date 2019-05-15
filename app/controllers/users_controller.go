@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"wheel.smart26.com/app/models"
 	"wheel.smart26.com/app/views"
-	"wheel.smart26.com/utils"
+	"wheel.smart26.com/commons/log"
 )
 
 func UserCreate(w http.ResponseWriter, r *http.Request) {
@@ -14,7 +14,7 @@ func UserCreate(w http.ResponseWriter, r *http.Request) {
 
 	userSetParams(&user, r)
 
-	utils.LoggerInfo().Println("controllers: Create")
+	log.Info.Println("controllers: Create")
 	w.Header().Set("Content-Type", "application/json")
 
 	if models.UserCreate(&user) {
@@ -30,7 +30,7 @@ func UserUpdate(w http.ResponseWriter, r *http.Request) {
 
 	userSetParams(&user, r)
 
-	utils.LoggerInfo().Println("controllers: UserUpdate")
+	log.Info.Println("controllers: UserUpdate")
 	w.Header().Set("Content-Type", "application/json")
 
 	if models.UserUpdate(&user) {
@@ -44,7 +44,7 @@ func UserDestroy(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	user := models.UserFind(params["id"])
 
-	utils.LoggerInfo().Println("Controller: UserDestroy")
+	log.Info.Println("Controller: UserDestroy")
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -59,7 +59,7 @@ func UserShow(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	user := models.UserFind(params["id"])
 
-	utils.LoggerInfo().Println("controllers: UserShow")
+	log.Info.Println("controllers: UserShow")
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -77,7 +77,7 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 
 	m := normalizeUrlQueryParams("search", r.URL.Query())
 
-	utils.LoggerInfo().Println("controllers: UserList")
+	log.Info.Println("controllers: UserList")
 
 	users, page, pages, entries = models.UserPaginate(m, r.FormValue("page"), r.FormValue("perPage"))
 

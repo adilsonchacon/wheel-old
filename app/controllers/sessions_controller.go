@@ -12,8 +12,10 @@ import (
 	"time"
 	"wheel.smart26.com/app/models"
 	"wheel.smart26.com/app/views"
+	"wheel.smart26.com/commons/locale"
+	"wheel.smart26.com/commons/log"
+	"wheel.smart26.com/commons/mailer"
 	"wheel.smart26.com/config"
-	"wheel.smart26.com/utils"
 )
 
 type SessionClaims struct {
@@ -31,7 +33,7 @@ func SessionSignIn(w http.ResponseWriter, r *http.Request) {
 	var user = models.UserAuthenticate(r.FormValue("email"), r.FormValue("password"))
 	var errors []string
 
-	utils.LoggerInfo().Println("controllers: SessionSingIn")
+	log.Info.Println("controllers: SessionSingIn")
 	w.Header().Set("Content-Type", "application/json")
 
 	if !models.UserNil(user) {
@@ -61,16 +63,16 @@ func SessionSignOut(w http.ResponseWriter, r *http.Request) {
 func SessionSignUp(w http.ResponseWriter, r *http.Request) {
 	var user = models.User{Name: r.FormValue("name"), Email: r.FormValue("email"), Password: r.FormValue("password"), Locale: r.FormValue("locale"), Admin: false}
 
-	utils.LoggerInfo().Println("controllers: SignUp")
+	log.Info.Println("controllers: SignUp")
 	w.Header().Set("Content-Type", "application/json")
 
 	if models.UserSave(&user) {
-		utils.LocaleLoad(user.Locale)
+		locale.Load(user.Locale)
 
-		utils.MailerAddTo(user.Name, user.Email)
-		subject := utils.LocaleWelcome() + " " + models.UserFirstName(&user)
+		mailer.AddTo(user.Name, user.Email)
+		subject := locale.Welcome() + " " + models.UserFirstName(&user)
 		body := views.SessionSignUpMailer(&user)
-		go utils.MailerSend(subject, body, true)
+		go mailer.Send(subject, body, true)
 
 		json.NewEncoder(w).Encode(views.SessionSignUpSuccessMessage("notice", "user was successfully created", sessionGenerateToken(user, r.RemoteAddr)))
 	} else {
@@ -81,16 +83,16 @@ func SessionSignUp(w http.ResponseWriter, r *http.Request) {
 func SessionPassword(w http.ResponseWriter, r *http.Request) {
 	var user = models.UserFindByEmail(r.FormValue("email"))
 
-	utils.LoggerInfo().Println("controllers: SessionPassword")
+	log.Info.Println("controllers: SessionPassword")
 
 	if models.UserExists(user) {
-		utils.LocaleLoad(user.Locale)
+		locale.Load(user.Locale)
 
 		token := models.UserSetRecovery(&user)
-		utils.MailerAddTo(user.Name, user.Email)
-		subject := utils.LocalePasswordRecoveryInstructions()
+		mailer.AddTo(user.Name, user.Email)
+		subject := locale.PasswordRecoveryInstructions()
 		body := views.SessionPasswordRecoveryInstructionsMailer(&user, token)
-		go utils.MailerSend(subject, body, true)
+		go mailer.Send(subject, body, true)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -101,7 +103,7 @@ func SessionRecovery(w http.ResponseWriter, r *http.Request) {
 	var errors []string
 	user := models.UserFindByResetPasswordToken(r.Header.Get("token"))
 
-	utils.LoggerInfo().Println("controllers: SessionRecovery")
+	log.Info.Println("controllers: SessionRecovery")
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -127,7 +129,7 @@ func SessionRefresh(w http.ResponseWriter, r *http.Request) {
 	session := models.SessionFindByToken(claims.Jti)
 	models.SessionDeactivate(&session)
 
-	utils.LoggerInfo().Println("controllers: SessionRefresh")
+	log.Info.Println("controllers: SessionRefresh")
 	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(views.SessionRefreshSuccessMessage("notice", "session was successfully refreshed", sessionGenerateToken(models.UserCurrent, r.RemoteAddr)))
@@ -186,12 +188,12 @@ func sessionAuthToken(token string) (*jwt.Token, error) {
 
 	publicBytes, err_read_file = ioutil.ReadFile(publicKeyPath)
 	if err_read_file != nil {
-		utils.LoggerFatal().Println(err_read_file)
+		log.Fatal.Println(err_read_file)
 	}
 
 	publicKey, err_parse_rsa = jwt.ParseRSAPublicKeyFromPEM(publicBytes)
 	if err_parse_rsa != nil {
-		utils.LoggerFatal().Println(err_parse_rsa)
+		log.Fatal.Println(err_parse_rsa)
 	}
 
 	authToken, err = jwt.ParseWithClaims(token, &SessionClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -209,12 +211,12 @@ func sessionGenerateToken(user models.User, remoteAddr string) string {
 
 	privateBytes, err = ioutil.ReadFile(privateKeyPath)
 	if err != nil {
-		utils.LoggerFatal().Println(err)
+		log.Fatal.Println(err)
 	}
 
 	privateKey, err = jwt.ParseRSAPrivateKeyFromPEM(privateBytes)
 	if err != nil {
-		utils.LoggerFatal().Println(err)
+		log.Fatal.Println(err)
 	}
 
 	jti := uuid.Must(uuid.NewV4()).String()
@@ -224,9 +226,9 @@ func sessionGenerateToken(user models.User, remoteAddr string) string {
 
 	token, err := signer.SignedString(privateKey)
 	if err != nil {
-		utils.LoggerError().Println(err)
+		log.Error.Println(err)
 	} else {
-		utils.LoggerInfo().Println("Token was succesfully created for user " + user.Email)
+		log.Info.Println("Token was succesfully created for user " + user.Email)
 	}
 
 	t := time.Now()

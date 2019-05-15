@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"wheel.smart26.com/app/models"
 	"wheel.smart26.com/app/views"
-	"wheel.smart26.com/utils"
+	"wheel.smart26.com/commons/crypto"
+	"wheel.smart26.com/commons/log"
 )
 
 func MyselfUpdate(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +14,7 @@ func MyselfUpdate(w http.ResponseWriter, r *http.Request) {
 
 	myselfSetParams(&user, r)
 
-	utils.LoggerInfo().Println("controllers: MyselfUpdate")
+	log.Info.Println("controllers: MyselfUpdate")
 	w.Header().Set("Content-Type", "application/json")
 
 	if user.ID != 0 && models.UserSave(&user) {
@@ -27,14 +28,14 @@ func MyselfUpdatePassword(w http.ResponseWriter, r *http.Request) {
 	var errors []string
 	user := models.UserCurrent
 
-	utils.LoggerInfo().Println("controllers: MyselfChangePassword")
+	log.Info.Println("controllers: MyselfChangePassword")
 	w.Header().Set("Content-Type", "application/json")
 
 	if !models.UserExists(user) {
 		errors = append(errors, "invalid user")
 	} else if r.FormValue("new_password") != r.FormValue("password_confirmation") {
 		errors = append(errors, "password confirmation does not match new password")
-	} else if !utils.SaferCheckPassword(r.FormValue("password"), user.Password) {
+	} else if !crypto.CheckPassword(r.FormValue("password"), user.Password) {
 		errors = append(errors, "invalid password")
 	} else if user.Password = r.FormValue("new_password"); models.UserSave(&user) {
 		json.NewEncoder(w).Encode(views.SetSystemMessage("notice", "password was successfully changed"))
@@ -50,7 +51,7 @@ func MyselfUpdatePassword(w http.ResponseWriter, r *http.Request) {
 func MyselfDestroy(w http.ResponseWriter, r *http.Request) {
 	user := models.UserCurrent
 
-	utils.LoggerInfo().Println("Controller: MyselfDestroy")
+	log.Info.Println("Controller: MyselfDestroy")
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -62,7 +63,7 @@ func MyselfDestroy(w http.ResponseWriter, r *http.Request) {
 }
 
 func MyselfShow(w http.ResponseWriter, r *http.Request) {
-	utils.LoggerInfo().Println("controllers: MyselfShow")
+	log.Info.Println("controllers: MyselfShow")
 
 	w.Header().Set("Content-Type", "application/json")
 

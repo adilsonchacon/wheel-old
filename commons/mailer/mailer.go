@@ -1,13 +1,4 @@
-// utils.MailerSetFrom("", "no-reply@blazesecurity.com.br")
-// utils.MailerAddTo("Adilson Chacon", "adilsonchacon@gmail.com")
-// utils.MailerAddCc("Eu 2", "achacon@gmail.com")
-// utils.MailerAddBcc("Eu 2", "chacon@blazeinfosec.com")
-// Send as plain text
-// utils.MailerSend("oi de novo com arquivo de configuracao", "mais um teste e q saco", false)
-// OR as HTML
-// utils.MailerSend("agora com html", "<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><style type=\"text/css\">h1 {color: red; font-size: 24px; font-weight: bold;}</style></head><body><h1>HI!</h1></body></html>", true)
-
-package utils
+package mailer
 
 import (
 	"crypto/tls"
@@ -20,9 +11,10 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"wheel.smart26.com/commons/log"
 )
 
-type mailerConfig struct {
+type Config struct {
 	User     string
 	Name     string
 	Password string
@@ -37,57 +29,57 @@ var (
 	bcc  []mail.Address
 )
 
-func MailerSetFrom(name string, tEmail string) {
+func SetFrom(name string, tEmail string) {
 	validEmail := regexp.MustCompile(`\A[^@]+@([^@\.]+\.)+[^@\.]+\z`)
 
 	if validEmail.MatchString(tEmail) {
 		from = mail.Address{name, tEmail}
 	} else {
-		LoggerError().Println("email is invalid")
+		log.Error.Println("email is invalid")
 	}
 }
 
-func MailerAddTo(name string, tEmail string) {
+func AddTo(name string, tEmail string) {
 	validEmail := regexp.MustCompile(`\A[^@]+@([^@\.]+\.)+[^@\.]+\z`)
 
 	if validEmail.MatchString(tEmail) {
 		to = append(to, mail.Address{name, tEmail})
 	} else {
-		LoggerError().Println("email is invalid")
+		log.Error.Println("email is invalid")
 	}
 }
 
-func MailerAddCc(name string, tEmail string) {
+func AddCc(name string, tEmail string) {
 	validEmail := regexp.MustCompile(`\A[^@]+@([^@\.]+\.)+[^@\.]+\z`)
 
 	if validEmail.MatchString(tEmail) {
 		cc = append(cc, mail.Address{name, tEmail})
 	} else {
-		LoggerError().Println("email is invalid")
+		log.Error.Println("email is invalid")
 	}
 }
 
-func MailerAddBcc(name string, tEmail string) {
+func AddBcc(name string, tEmail string) {
 	validEmail := regexp.MustCompile(`\A[^@]+@([^@\.]+\.)+[^@\.]+\z`)
 
 	if validEmail.MatchString(tEmail) {
 		bcc = append(bcc, mail.Address{name, tEmail})
 	} else {
-		LoggerError().Println("email is invalid")
+		log.Error.Println("email is invalid")
 	}
 }
 
-func MailerResetAll() {
-	MailerSetFrom("", "")
+func ResetAll() {
+	SetFrom("", "")
 	to = to[:0]
 	cc = cc[:0]
 	bcc = bcc[:0]
 }
 
-func MailerSend(subject string, body string, html bool) {
-	receipts := mailerReciepts()
+func Send(subject string, body string, html bool) {
+	receipts := Reciepts()
 	headers := make(map[string]string)
-	config := mailerLoadConfigFile()
+	config := LoadConfigFile()
 
 	if from.String() == "<@>" {
 		from = mail.Address{config.Name, config.User}
@@ -97,15 +89,15 @@ func MailerSend(subject string, body string, html bool) {
 	headers["From"] = from.String()
 
 	if len(to) > 0 {
-		headers["To"] = mailerStringfy("to")
+		headers["To"] = Stringfy("to")
 	}
 
 	if len(cc) > 0 {
-		headers["Cc"] = mailerStringfy("cc")
+		headers["Cc"] = Stringfy("cc")
 	}
 
 	if len(bcc) > 0 {
-		headers["Bcc"] = mailerStringfy("bcc")
+		headers["Bcc"] = Stringfy("bcc")
 	}
 
 	if html {
@@ -137,51 +129,51 @@ func MailerSend(subject string, body string, html bool) {
 	// from the very beginning (no starttls)
 	conn, err := tls.Dial("tcp", servername, tlsconfig)
 	if err != nil {
-		LoggerFatal().Panic(err)
+		log.Fatal.Panic(err)
 	}
 
 	client, err := smtp.NewClient(conn, host)
 	if err != nil {
-		LoggerFatal().Panic(err)
+		log.Fatal.Panic(err)
 	}
 
 	// Auth
 	if err = client.Auth(auth); err != nil {
-		LoggerFatal().Panic(err)
+		log.Fatal.Panic(err)
 	}
 
 	// To
 	if err = client.Mail(from.Address); err != nil {
-		LoggerFatal().Panic(err)
+		log.Fatal.Panic(err)
 	}
 
 	// To, Cc and Bcc
 	for i := 0; i < len(receipts); i++ {
 		if err = client.Rcpt(receipts[0]); err != nil {
-			LoggerFatal().Panic(err)
+			log.Fatal.Panic(err)
 		}
 	}
 
 	// Data
 	socket, err := client.Data()
 	if err != nil {
-		LoggerFatal().Panic(err)
+		log.Fatal.Panic(err)
 	}
 
 	_, err = socket.Write([]byte(message))
 	if err != nil {
-		LoggerFatal().Panic(err)
+		log.Fatal.Panic(err)
 	}
 
 	err = socket.Close()
 	if err != nil {
-		LoggerFatal().Panic(err)
+		log.Fatal.Panic(err)
 	}
 
 	client.Quit()
 }
 
-func mailerStringfy(tType string) string {
+func Stringfy(tType string) string {
 	var isTo = regexp.MustCompile(`(?i)\Ato\z`)
 	var isCc = regexp.MustCompile(`(?i)\Acc\z`)
 	var isBcc = regexp.MustCompile(`(?i)\Abcc\z`)
@@ -198,7 +190,7 @@ func mailerStringfy(tType string) string {
 	} else if isFrom.MatchString(tType) {
 		auxEmail = append(auxEmail, from)
 	} else {
-		LoggerError().Println("Invalid param for mailerStringfy, available params are to, cc, bcc and from")
+		log.Error.Println("Invalid param for Stringfy, available params are to, cc, bcc and from")
 	}
 
 	for i := 0; i < len(auxEmail); i++ {
@@ -208,7 +200,7 @@ func mailerStringfy(tType string) string {
 	return strings.Join(auxString, "; ")
 }
 
-func mailerReciepts() []string {
+func Reciepts() []string {
 	var reciepts []string
 
 	for i := 0; i < len(to); i++ {
@@ -226,21 +218,21 @@ func mailerReciepts() []string {
 	return reciepts
 }
 
-func mailerLoadConfigFile() mailerConfig {
-	config := mailerConfig{}
+func LoadConfigFile() Config {
+	config := Config{}
 
-	err := yaml.Unmarshal(mailerReadConfigFile(), &config)
+	err := yaml.Unmarshal(ReadConfigFile(), &config)
 	if err != nil {
-		LoggerError().Fatalf("error: %v", err)
+		log.Error.Fatalf("error: %v", err)
 	}
 
 	return config
 }
 
-func mailerReadConfigFile() []byte {
+func ReadConfigFile() []byte {
 	data, err := ioutil.ReadFile("./config/email.yml")
 	if err != nil {
-		LoggerError().Fatal(err)
+		log.Error.Fatal(err)
 	}
 
 	return data

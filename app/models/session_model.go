@@ -3,7 +3,7 @@ package models
 import (
 	"strconv"
 	"time"
-	"wheel.smart26.com/utils"
+	"wheel.smart26.com/commons/log"
 )
 
 type Session struct {
@@ -60,7 +60,7 @@ func SessionUpdate(session *Session) bool {
 }
 
 func SessionCreate(session *Session) bool {
-	utils.LoggerInfo().Println("models: SessionCreate")
+	log.Info.Println("models: SessionCreate")
 
 	if sessionValidate(session) && db.NewRecord(session) {
 		db.Create(&session)

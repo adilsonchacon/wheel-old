@@ -1,4 +1,4 @@
-package utils
+package crypto
 
 import (
 	"crypto/hmac"
@@ -7,20 +7,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"math/rand"
 	"time"
+	"wheel.smart26.com/commons/log"
 )
 
-func SaferSetPassword(password string) string {
+func SetPassword(password string) string {
 	var err error
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		LoggerError().Println(err)
+		log.Error.Println(err)
 	}
 
 	return string(hash)
 }
 
-func SaferCheckPassword(password string, hashedPassword string) bool {
+func CheckPassword(password string, hashedPassword string) bool {
 	var err error
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
@@ -28,7 +29,7 @@ func SaferCheckPassword(password string, hashedPassword string) bool {
 	return err == nil
 }
 
-func SaferRandString(size int) string {
+func RandString(size int) string {
 	var letters = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 	rand.Seed(time.Now().UnixNano())
@@ -41,7 +42,7 @@ func SaferRandString(size int) string {
 	return string(b)
 }
 
-func SaferEncryptText(clearText string, key string) string {
+func EncryptText(clearText string, key string) string {
 	mac := hmac.New(sha256.New, []byte(key))
 	mac.Write([]byte(clearText))
 

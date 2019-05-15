@@ -3,7 +3,7 @@ package config
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"wheel.smart26.com/utils"
+	"wheel.smart26.com/commons/log"
 )
 
 type AppConfig struct {
@@ -44,7 +44,7 @@ func Locales() []string {
 func readAppConfigFile() []byte {
 	data, err := ioutil.ReadFile("./config/app.yml")
 	if err != nil {
-		utils.LoggerError().Fatal(err)
+		log.Error.Fatal(err)
 	}
 
 	return data
@@ -53,6 +53,6 @@ func readAppConfigFile() []byte {
 func init() {
 	err := yaml.Unmarshal(readAppConfigFile(), &appConfig)
 	if err != nil {
-		utils.LoggerError().Fatalf("error: %v", err)
+		log.Error.Fatalf("error: %v", err)
 	}
 }

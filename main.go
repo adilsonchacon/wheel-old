@@ -4,9 +4,9 @@ import (
 	"flag"
 	"net/http"
 	"wheel.smart26.com/app/models"
+	"wheel.smart26.com/commons/log"
 	"wheel.smart26.com/config"
 	"wheel.smart26.com/routes"
-	"wheel.smart26.com/utils"
 )
 
 func main() {
@@ -19,15 +19,15 @@ func main() {
 	flag.StringVar(&port, "port", "8081", "http server port")
 	flag.Parse()
 
-	utils.LoggerInfo().Println("starting app", config.AppName())
+	log.Info.Println("starting app", config.AppName())
 
 	models.DbConnect()
 
 	if mode == "migrate" {
 		models.Migrate()
 	} else if mode == "s" || mode == "server" {
-		utils.LoggerFatal().Fatal(http.ListenAndServe(host+":"+port, routes.Routes(host, port)))
+		log.Fatal.Println(http.ListenAndServe(host+":"+port, routes.Routes(host, port)))
 	} else {
-		utils.LoggerFatal().Fatal("invalid run mode, please, use \"--help\" for more details")
+		log.Fatal.Println("invalid run mode, please, use \"--help\" for more details")
 	}
 }

@@ -284,7 +284,7 @@ _Middlewares_ are executed before a request reachs the controller's method. By d
 
 ### Logging
 
-utils.LoggerInfo().Println("Logger example")
+log.Info.Println("Logger example")
 
 ## Programming
 

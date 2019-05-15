@@ -1,36 +1,37 @@
-package utils
+package locale
 
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"wheel.smart26.com/commons/log"
 )
 
-type localeKeys struct {
+type Keys struct {
 	Welcome                        string
 	Password_recovery_instructions string
 }
 
-var locales localeKeys
+var locales Keys
 
-func LocaleWelcome() string {
+func Welcome() string {
 	return locales.Welcome
 }
 
-func LocalePasswordRecoveryInstructions() string {
+func PasswordRecoveryInstructions() string {
 	return locales.Password_recovery_instructions
 }
 
-func LocaleLoad(language string) {
+func Load(language string) {
 	err := yaml.Unmarshal(readLocaleFile(language), &locales)
 	if err != nil {
-		LoggerError().Fatalf("error: %v", err)
+		log.Error.Fatalf("error: %v", err)
 	}
 }
 
 func readLocaleFile(language string) []byte {
 	data, err := ioutil.ReadFile("./config/locales/" + language + ".yml")
 	if err != nil {
-		LoggerError().Fatal(err)
+		log.Error.Fatal(err)
 	}
 
 	return data

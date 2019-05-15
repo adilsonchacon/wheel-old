@@ -8,7 +8,8 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
-	"wheel.smart26.com/utils"
+	"wheel.smart26.com/commons/conversor"
+	"wheel.smart26.com/commons/log"
 )
 
 var db *gorm.DB
@@ -21,17 +22,17 @@ func DbConnect() {
 	db, err = gorm.Open("postgres", stringfyDatabaseConfigFile(dbCconfig))
 
 	if err != nil {
-		utils.LoggerFatal().Println(err)
+		log.Fatal.Println(err)
 		panic("failed connect to database")
 	} else {
-		utils.LoggerInfo().Println("connected to the database successfully")
+		log.Info.Println("connected to the database successfully")
 	}
 
 	pool, err := strconv.Atoi(dbCconfig["pool"])
 	if err != nil {
-		utils.LoggerFatal().Println(err)
+		log.Fatal.Println(err)
 	} else {
-		utils.LoggerInfo().Printf("database pool of connections: %d", pool)
+		log.Info.Printf("database pool of connections: %d", pool)
 	}
 
 	db.DB().SetMaxIdleConns(pool)
@@ -70,7 +71,7 @@ func SetColumnValue(table interface{}, columnName string, value string) error {
 
 	if ok {
 		columnType, _ := GetColumnType(table, columnName)
-		valueInterface, _ := utils.ConvertStringToInterface(columnType, value)
+		valueInterface, _ := conversor.StringToInterface(columnType, value)
 		return field.Set(valueInterface)
 	} else {
 		return errors.New("column was not found")
@@ -98,7 +99,7 @@ func loadDatabaseConfigFile() map[string]string {
 
 	err := yaml.Unmarshal(readDatabaseConfigFile(), &config)
 	if err != nil {
-		utils.LoggerFatal().Printf("error: %v\n", err)
+		log.Fatal.Printf("error: %v\n", err)
 	}
 
 	if config["pool"] == "" {
@@ -111,7 +112,7 @@ func loadDatabaseConfigFile() map[string]string {
 func readDatabaseConfigFile() []byte {
 	data, err := ioutil.ReadFile("./config/database.yml")
 	if err != nil {
-		utils.LoggerFatal().Println(err)
+		log.Fatal.Println(err)
 	}
 
 	return data

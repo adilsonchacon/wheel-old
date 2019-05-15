@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"wheel.smart26.com/utils"
+	"wheel.smart26.com/commons/log"
 )
 
 func BuildSearchEngine(table interface{}, criteria map[string]string, logic string) (string, []interface{}) {
@@ -27,7 +27,7 @@ func BuildSearchEngine(table interface{}, criteria map[string]string, logic stri
 			}
 
 		} else {
-			utils.LoggerError().Println("BuildSearchEngine", err)
+			log.Error.Println("BuildSearchEngine", err)
 		}
 	}
 
@@ -88,7 +88,7 @@ func handleCriterion(table interface{}, key string, value string) (string, inter
 
 	columnType, err = GetColumnType(table, column)
 	if err != nil {
-		utils.LoggerError().Println("handleCriterion", err)
+		log.Error.Println("handleCriterion", err)
 		return "", "", err
 	}
 
@@ -99,7 +99,7 @@ func handleCriterion(table interface{}, key string, value string) (string, inter
 	} else {
 		interfaceValue, err = valueToInterface(columnType, value, regexpInclusionQuery.MatchString(query))
 		if err != nil {
-			utils.LoggerError().Println("handleCriterion", err)
+			log.Error.Println("handleCriterion", err)
 			return "", "", err
 		}
 	}

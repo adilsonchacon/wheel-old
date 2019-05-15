@@ -4,7 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"wheel.smart26.com/app/controllers"
-	"wheel.smart26.com/utils"
+	"wheel.smart26.com/commons/log"
 )
 
 func Routes(host string, port string) *mux.Router {
@@ -13,11 +13,11 @@ func Routes(host string, port string) *mux.Router {
 	router.NotFoundHandler = http.HandlerFunc(controllers.Error404)
 
 	// middlewares
-	utils.LoggerInfo().Println("setting up middlewares")
+	log.Info.Println("setting up middlewares")
 	router.Use(loggingMiddleware)
 	router.Use(authorizeMiddleware)
 
-	utils.LoggerInfo().Println("setting up routes")
+	log.Info.Println("setting up routes")
 	// sessions
 	router.HandleFunc("/sessions/sign_in", controllers.SessionSignIn).Methods("POST")
 	router.HandleFunc("/sessions/sign_out", controllers.SessionSignOut).Methods("DELETE")
@@ -39,7 +39,7 @@ func Routes(host string, port string) *mux.Router {
 	router.HandleFunc("/users/{id}", controllers.UserUpdate).Methods("PUT")
 	router.HandleFunc("/users/{id}", controllers.UserDestroy).Methods("DELETE")
 
-	utils.LoggerInfo().Println("listening on " + host + ":" + port + ", CTRL+C to stop")
+	log.Info.Println("listening on " + host + ":" + port + ", CTRL+C to stop")
 
 	return router
 }

@@ -9,14 +9,14 @@ import (
 	"wheel.smart26.com/app/controllers"
 	"wheel.smart26.com/app/models"
 	"wheel.smart26.com/app/views"
-	"wheel.smart26.com/utils"
+	"wheel.smart26.com/commons/log"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		utils.LoggerInfo().Println(r.Method + ": " + filterUrlValues(r.URL.Path, r.URL.Query()) + " for " + r.RemoteAddr)
+		log.Info.Println(r.Method + ": " + filterUrlValues(r.URL.Path, r.URL.Query()) + " for " + r.RemoteAddr)
 		r.ParseForm()
-		utils.LoggerInfo().Println("Params: " + filterFormValues(r.Form))
+		log.Info.Println("Params: " + filterFormValues(r.Form))
 		next.ServeHTTP(w, r)
 	})
 }
@@ -48,46 +48,46 @@ func authorizeMiddleware(next http.Handler) http.Handler {
 }
 
 func authorizeAdmin(token string) bool {
-	utils.LoggerInfo().Println("Checking token...")
+	log.Info.Println("Checking token...")
 	id, err := controllers.SessionCheck(token)
 	if err != nil {
-		utils.LoggerInfo().Println("Token is not valid")
+		log.Info.Println("Token is not valid")
 		return false
 	} else {
-		utils.LoggerInfo().Println("Token is valid")
-		utils.LoggerInfo().Printf("Checking user %d...\n", id)
+		log.Info.Println("Token is valid")
+		log.Info.Printf("Checking user %d...\n", id)
 		user := models.UserFind(id)
 		if models.UserExists(user) {
 			if models.UserFind(id).Admin {
-				utils.LoggerInfo().Println("User authorized")
+				log.Info.Println("User authorized")
 				return true
 			} else {
-				utils.LoggerInfo().Println("User not authorized")
+				log.Info.Println("User not authorized")
 				return false
 			}
 		} else {
-			utils.LoggerWarn().Println("User does not exist")
+			log.Warn.Println("User does not exist")
 			return false
 		}
 	}
 }
 
 func authorizeUser(token string) bool {
-	utils.LoggerInfo().Println("Checking token...")
+	log.Info.Println("Checking token...")
 	id, err := controllers.SessionCheck(token)
 	if err != nil {
-		utils.LoggerInfo().Println("Token is not valid")
+		log.Info.Println("Token is not valid")
 		return false
 	} else {
-		utils.LoggerInfo().Println("Token is valid")
-		utils.LoggerInfo().Printf("Checking user %d...\n", id)
+		log.Info.Println("Token is valid")
+		log.Info.Printf("Checking user %d...\n", id)
 		user := models.UserFind(id)
 		if models.UserExists(user) {
 			models.UserSetCurrent(id)
-			utils.LoggerInfo().Println("User authorized")
+			log.Info.Println("User authorized")
 			return true
 		} else {
-			utils.LoggerWarn().Println("User does not exist")
+			log.Warn.Println("User does not exist")
 			return false
 		}
 	}

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"html/template"
 	"wheel.smart26.com/app/models"
+	"wheel.smart26.com/commons/log"
 	"wheel.smart26.com/config"
-	"wheel.smart26.com/utils"
 )
 
 type SessionSignInSuccess struct {
@@ -51,7 +51,7 @@ func SessionSignUpMailer(user *models.User) string {
 
 	tmpl, err := template.ParseFiles("./app/views/mailer/sessions/sign_up." + user.Locale + ".html")
 	if err != nil {
-		utils.LoggerError().Println(err)
+		log.Error.Println(err)
 	}
 
 	err = tmpl.Execute(&content, &data)
@@ -66,7 +66,7 @@ func SessionPasswordRecoveryInstructionsMailer(user *models.User, token string) 
 
 	tmpl, err := template.ParseFiles("./app/views/mailer/sessions/password_recovery." + user.Locale + ".html")
 	if err != nil {
-		utils.LoggerError().Println(err)
+		log.Error.Println(err)
 	}
 
 	err = tmpl.Execute(&content, &data)

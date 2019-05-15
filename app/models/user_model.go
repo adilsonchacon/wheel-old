@@ -5,8 +5,9 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"wheel.smart26.com/commons/crypto"
+	"wheel.smart26.com/commons/log"
 	"wheel.smart26.com/config"
-	"wheel.smart26.com/utils"
 )
 
 type User struct {
@@ -88,9 +89,9 @@ func UserUpdate(user *User) bool {
 				mapUpdate[column] = valueNew
 
 				if column == "password" {
-					utils.LoggerInfo().Println(mapUpdate[column])
-					utils.LoggerInfo().Println(mapUpdate[column].(string))
-					mapUpdate[column] = utils.SaferSetPassword(mapUpdate[column].(string))
+					log.Info.Println(mapUpdate[column])
+					log.Info.Println(mapUpdate[column].(string))
+					mapUpdate[column] = crypto.SetPassword(mapUpdate[column].(string))
 				}
 			}
 		}
@@ -110,10 +111,10 @@ func UserUpdate(user *User) bool {
 }
 
 func UserCreate(user *User) bool {
-	utils.LoggerInfo().Println("models: SaveUser")
+	log.Info.Println("models: SaveUser")
 
 	if userValidate(user) && db.NewRecord(user) {
-		user.Password = utils.SaferSetPassword(user.Password)
+		user.Password = crypto.SetPassword(user.Password)
 
 		db.Create(&user)
 
@@ -157,7 +158,7 @@ func UserFindByEmail(email string) User {
 func UserFindByResetPasswordToken(token string) User {
 	var user User
 
-	enconded_token := utils.SaferEncryptText(token, config.SecretKey())
+	enconded_token := crypto.EncryptText(token, config.SecretKey())
 	two_days_ago := time.Now().Add(time.Second * time.Duration(config.ResetPasswordExpirationSeconds()) * (-1))
 
 	db.Where("reset_password_token = ? AND reset_password_sent_at >= ? AND deleted_at IS NULL", enconded_token, two_days_ago).First(&user)
@@ -199,7 +200,7 @@ func UserPaginate(criteria map[string]string, page interface{}, perPage interfac
 func UserAuthenticate(email string, password string) User {
 	var user User
 	user = UserFindByEmail(email)
-	if !db.NewRecord(user) && !utils.SaferCheckPassword(password, user.Password) {
+	if !db.NewRecord(user) && !crypto.CheckPassword(password, user.Password) {
 		user = User{}
 	}
 
@@ -226,12 +227,12 @@ func UserIdExists(id uint) bool {
 
 func UserSetRecovery(user *User) string {
 	t := time.Now()
-	token := utils.SaferRandString(20)
+	token := crypto.RandString(20)
 
 	if db.NewRecord(user) {
 		return ""
 	} else {
-		user.ResetPasswordToken = utils.SaferEncryptText(token, config.SecretKey())
+		user.ResetPasswordToken = crypto.EncryptText(token, config.SecretKey())
 		user.ResetPasswordSentAt = &t
 		UserSave(user)
 
