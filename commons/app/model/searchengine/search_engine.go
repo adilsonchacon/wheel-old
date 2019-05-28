@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"wheel.smart26.com/commons/db"
+	"wheel.smart26.com/commons/app/model"
 	"wheel.smart26.com/commons/log"
 )
 
@@ -48,7 +48,7 @@ func handleCriterion(table interface{}, key string, value string) (string, inter
 
 	column, query = strings.Join(names[:len(names)-1], "_"), names[len(names)-1]
 
-	columnType, err = db.GetColumnType(table, column)
+	columnType, err = model.GetColumnType(table, column)
 	if err != nil {
 		log.Error.Println("handleCriterion", err)
 		return "", "", err

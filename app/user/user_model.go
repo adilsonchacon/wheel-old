@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 	"wheel.smart26.com/app/entity"
+	"wheel.smart26.com/commons/app/model"
+	"wheel.smart26.com/commons/app/model/pagination"
 	"wheel.smart26.com/commons/crypto"
-	"wheel.smart26.com/commons/db"
-	"wheel.smart26.com/commons/db/pagination"
 	"wheel.smart26.com/config"
 )
 
@@ -20,8 +20,8 @@ func Find(id interface{}) (entity.User, error) {
 	var user entity.User
 	var err error
 
-	db.Conn.First(&user, id, "deleted_at IS NULL")
-	if db.Conn.NewRecord(user) {
+	model.Db.First(&user, id, "deleted_at IS NULL")
+	if model.Db.NewRecord(user) {
 		err = errors.New(NotFound)
 	}
 
@@ -31,7 +31,7 @@ func Find(id interface{}) (entity.User, error) {
 func FindAll() []entity.User {
 	var users []entity.User
 
-	db.Conn.Order("name").Find(&users, "deleted_at IS NULL")
+	model.Db.Order("name").Find(&users, "deleted_at IS NULL")
 
 	return users
 }
@@ -53,7 +53,7 @@ func IsValid(user *entity.User) (bool, []error) {
 		errs = append(errs, errors.New("email is too long"))
 	} else if !validEmail.MatchString(user.Email) {
 		errs = append(errs, errors.New("email is invalid"))
-	} else if db.Conn.Model(&entity.User{}).Where("id <> ? AND email = ? AND deleted_at IS NULL", user.ID, user.Email).Count(&count); count > 0 {
+	} else if model.Db.Model(&entity.User{}).Where("id <> ? AND email = ? AND deleted_at IS NULL", user.ID, user.Email).Count(&count); count > 0 {
 		errs = append(errs, errors.New("email has already been taken"))
 	}
 
@@ -85,10 +85,10 @@ func Update(user *entity.User) (bool, []error) {
 	valid, errs = IsValid(user)
 
 	if valid {
-		columns := db.ColumnsFromTable(user, false)
+		columns := model.ColumnsFromTable(user, false)
 		for _, column := range columns {
-			newValue, _ = db.GetColumnValue(user, column)
-			currentValue, _ = db.GetColumnValue(currentUser, column)
+			newValue, _ = model.GetColumnValue(user, column)
+			currentValue, _ = model.GetColumnValue(currentUser, column)
 
 			if newValue != currentValue {
 				mapUpdate[column] = newValue
@@ -100,7 +100,7 @@ func Update(user *entity.User) (bool, []error) {
 		}
 
 		if len(mapUpdate) > 0 {
-			db.Conn.Model(&user).Updates(mapUpdate)
+			model.Db.Model(&user).Updates(mapUpdate)
 		}
 
 	}
@@ -110,12 +110,12 @@ func Update(user *entity.User) (bool, []error) {
 
 func Create(user *entity.User) (bool, []error) {
 	valid, errs := IsValid(user)
-	if valid && db.Conn.NewRecord(user) {
+	if valid && model.Db.NewRecord(user) {
 		user.Password = crypto.SetPassword(user.Password)
 
-		db.Conn.Create(&user)
+		model.Db.Create(&user)
 
-		if db.Conn.NewRecord(user) {
+		if model.Db.NewRecord(user) {
 			errs = append(errs, errors.New("database error"))
 			return false, errs
 		}
@@ -125,7 +125,7 @@ func Create(user *entity.User) (bool, []error) {
 }
 
 func Save(user *entity.User) (bool, []error) {
-	if db.Conn.NewRecord(user) {
+	if model.Db.NewRecord(user) {
 		return Create(user)
 	} else {
 		return Update(user)
@@ -133,10 +133,10 @@ func Save(user *entity.User) (bool, []error) {
 }
 
 func Destroy(user *entity.User) bool {
-	if db.Conn.NewRecord(user) {
+	if model.Db.NewRecord(user) {
 		return false
 	} else {
-		db.Conn.Delete(&user)
+		model.Db.Delete(&user)
 		return true
 	}
 }
@@ -145,8 +145,8 @@ func FindByEmail(email string) (entity.User, error) {
 	var user entity.User
 	var err error
 
-	db.Conn.Where("email = ? AND deleted_at IS NULL", email).First(&user)
-	if db.Conn.NewRecord(user) {
+	model.Db.Where("email = ? AND deleted_at IS NULL", email).First(&user)
+	if model.Db.NewRecord(user) {
 		user = entity.User{}
 		err = errors.New(NotFound)
 	}
@@ -161,8 +161,8 @@ func FindByResetPasswordToken(token string) (entity.User, error) {
 	enconded_token := crypto.EncryptText(token, config.SecretKey())
 	two_days_ago := time.Now().Add(time.Second * time.Duration(config.ResetPasswordExpirationSeconds()) * (-1))
 
-	db.Conn.Where("reset_password_token = ? AND reset_password_sent_at >= ? AND deleted_at IS NULL", enconded_token, two_days_ago).First(&user)
-	if db.Conn.NewRecord(user) {
+	model.Db.Where("reset_password_token = ? AND reset_password_sent_at >= ? AND deleted_at IS NULL", enconded_token, two_days_ago).First(&user)
+	if model.Db.NewRecord(user) {
 		user = entity.User{}
 		err = errors.New(NotFound)
 	}
@@ -184,7 +184,7 @@ func Paginate(criteria map[string]string, page interface{}, perPage interface{})
 func Authenticate(email string, password string) (entity.User, error) {
 	user, err := FindByEmail(email)
 
-	if db.Conn.NewRecord(user) || !crypto.CheckPassword(password, user.Password) {
+	if model.Db.NewRecord(user) || !crypto.CheckPassword(password, user.Password) {
 		user = entity.User{}
 		err = errors.New("invalid credentials")
 	}
@@ -193,7 +193,7 @@ func Authenticate(email string, password string) (entity.User, error) {
 }
 
 func IsNil(user *entity.User) bool {
-	return db.Conn.NewRecord(user)
+	return model.Db.NewRecord(user)
 }
 
 func Exists(user *entity.User) bool {
@@ -216,7 +216,7 @@ func IdExists(id interface{}) bool {
 func SetRecovery(user *entity.User) (string, []error) {
 	token := crypto.RandString(20)
 
-	if db.Conn.NewRecord(user) {
+	if model.Db.NewRecord(user) {
 		return "", []error{errors.New(NotFound)}
 	} else {
 		t := time.Now()
@@ -234,7 +234,7 @@ func SetRecovery(user *entity.User) (string, []error) {
 }
 
 func ClearRecovery(user *entity.User) (bool, []error) {
-	if db.Conn.NewRecord(user) {
+	if model.Db.NewRecord(user) {
 		return false, []error{errors.New(NotFound)}
 	} else {
 		user.ResetPasswordToken = ""

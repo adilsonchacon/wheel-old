@@ -4,7 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"wheel.smart26.com/app/handler"
-	"wheel.smart26.com/commons/controller"
+	"wheel.smart26.com/commons/app/controller"
 	"wheel.smart26.com/commons/log"
 )
 

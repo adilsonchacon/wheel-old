@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
-	"wheel.smart26.com/commons/view"
 )
 
 func ApiRoot(w http.ResponseWriter, r *http.Request) {

@@ -3,14 +3,11 @@ package main
 import (
 	"flag"
 	"net/http"
-	// "wheel.smart26.com/app/models"
+	"wheel.smart26.com/app/migration"
+	"wheel.smart26.com/commons/app/model"
 	"wheel.smart26.com/commons/log"
 	"wheel.smart26.com/config"
 	"wheel.smart26.com/routes"
-	// "wheel.smart26.com/app/session"
-	// "wheel.smart26.com/app/user"
-	"wheel.smart26.com/app/migration"
-	"wheel.smart26.com/commons/db"
 )
 
 func main() {
@@ -25,11 +22,8 @@ func main() {
 
 	log.Info.Println("starting app", config.AppName())
 
-	db.Connect()
+	model.Connect()
 
-	// log.Info.Println(user.Find(1))
-	// log.Info.Println(session.Find(1))
-	//
 	if mode == "migrate" {
 		migration.Run()
 	} else if mode == "s" || mode == "server" {

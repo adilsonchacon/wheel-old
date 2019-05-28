@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 	"wheel.smart26.com/app/entity"
-	"wheel.smart26.com/commons/db"
+	"wheel.smart26.com/commons/app/model"
 )
 
 const NotFound = "session was not found"
@@ -13,8 +13,8 @@ func Find(id interface{}) (entity.Session, error) {
 	var session entity.Session
 	var err error
 
-	db.Conn.First(&session, id)
-	if db.Conn.NewRecord(session) {
+	model.Db.First(&session, id)
+	if model.Db.NewRecord(session) {
 		err = errors.New(NotFound)
 	}
 
@@ -40,10 +40,10 @@ func Update(session *entity.Session) (bool, []error) {
 	valid, errs = IsValid(session)
 
 	if valid {
-		columns := db.ColumnsFromTable(session, false)
+		columns := model.ColumnsFromTable(session, false)
 		for _, column := range columns {
-			newValue, _ = db.GetColumnValue(session, column)
-			currentValue, _ = db.GetColumnValue(currentSession, column)
+			newValue, _ = model.GetColumnValue(session, column)
+			currentValue, _ = model.GetColumnValue(currentSession, column)
 
 			if newValue != currentValue {
 				mapUpdate[column] = newValue
@@ -51,7 +51,7 @@ func Update(session *entity.Session) (bool, []error) {
 		}
 
 		if len(mapUpdate) > 0 {
-			db.Conn.Model(&session).Updates(mapUpdate)
+			model.Db.Model(&session).Updates(mapUpdate)
 		}
 
 	}
@@ -61,10 +61,10 @@ func Update(session *entity.Session) (bool, []error) {
 
 func Create(session *entity.Session) (bool, []error) {
 	valid, errs := IsValid(session)
-	if valid && db.Conn.NewRecord(session) {
-		db.Conn.Create(&session)
+	if valid && model.Db.NewRecord(session) {
+		model.Db.Create(&session)
 
-		if db.Conn.NewRecord(session) {
+		if model.Db.NewRecord(session) {
 			errs = append(errs, errors.New("database error"))
 			return false, errs
 		}
@@ -74,7 +74,7 @@ func Create(session *entity.Session) (bool, []error) {
 }
 
 func Save(session *entity.Session) (bool, []error) {
-	if db.Conn.NewRecord(session) {
+	if model.Db.NewRecord(session) {
 		return Create(session)
 	} else {
 		return Update(session)
@@ -82,10 +82,10 @@ func Save(session *entity.Session) (bool, []error) {
 }
 
 func Destroy(session *entity.Session) bool {
-	if db.Conn.NewRecord(session) {
+	if model.Db.NewRecord(session) {
 		return false
 	} else {
-		db.Conn.Delete(&session)
+		model.Db.Delete(&session)
 		return true
 	}
 }
@@ -94,8 +94,8 @@ func FindByJti(jti string) (entity.Session, error) {
 	var session entity.Session
 	var err error
 
-	db.Conn.Where("jti = ?", jti).First(&session)
-	if db.Conn.NewRecord(session) {
+	model.Db.Where("jti = ?", jti).First(&session)
+	if model.Db.NewRecord(session) {
 		session = entity.Session{}
 		err = errors.New(NotFound)
 	}

@@ -4,8 +4,8 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"strconv"
-	"wheel.smart26.com/commons/db"
-	"wheel.smart26.com/commons/db/searchengine"
+	"wheel.smart26.com/commons/app/model"
+	"wheel.smart26.com/commons/app/model/searchengine"
 )
 
 type Counter struct {
@@ -21,7 +21,7 @@ func Query(table interface{}, criteria map[string]string, page interface{}, perP
 
 	query, values := searchengine.Query(table, criteria, "AND")
 
-	db.Conn.Table(db.TableName(table)).Select("COUNT(*) AS entries").Where(query, values...).Scan(&counter)
+	model.Db.Table(model.TableName(table)).Select("COUNT(*) AS entries").Where(query, values...).Scan(&counter)
 
 	totalPages = counter.Entries / entriesPerPage
 	if (counter.Entries % entriesPerPage) > 0 {
@@ -29,7 +29,7 @@ func Query(table interface{}, criteria map[string]string, page interface{}, perP
 	}
 
 	offset := (currentPage - 1) * entriesPerPage
-	pagination := db.Conn.Offset(offset).Limit(entriesPerPage).Where(query, values...)
+	pagination := model.Db.Offset(offset).Limit(entriesPerPage).Where(query, values...)
 
 	return pagination, currentPage, totalPages, counter.Entries
 }

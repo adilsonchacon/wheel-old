@@ -8,8 +8,8 @@ import (
 	"strings"
 	"wheel.smart26.com/app/handler"
 	"wheel.smart26.com/app/user"
+	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
-	"wheel.smart26.com/commons/view"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {

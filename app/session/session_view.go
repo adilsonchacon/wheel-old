@@ -5,8 +5,8 @@ import (
 	"html/template"
 	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/app/user"
+	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
-	"wheel.smart26.com/commons/view"
 	"wheel.smart26.com/config"
 )
 

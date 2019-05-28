@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/app/user"
-	"wheel.smart26.com/commons/controller"
-	"wheel.smart26.com/commons/db"
+	"wheel.smart26.com/commons/app/controller"
+	"wheel.smart26.com/commons/app/model"
+	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
-	"wheel.smart26.com/commons/view"
 )
 
 func UserCreate(w http.ResponseWriter, r *http.Request) {
@@ -107,7 +107,7 @@ func userSetParams(userSet *entity.User, r *http.Request) {
 	for key := range r.Form {
 		for _, allowedParam := range allowedParams {
 			if key == allowedParam {
-				db.SetColumnValue(userSet, allowedParam, r.FormValue(allowedParam))
+				model.SetColumnValue(userSet, allowedParam, r.FormValue(allowedParam))
 				break
 			}
 		}
