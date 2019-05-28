@@ -1,4 +1,4 @@
-package models
+package db
 
 import (
 	"errors"
@@ -12,14 +12,14 @@ import (
 	"wheel.smart26.com/commons/log"
 )
 
-var db *gorm.DB
+var Conn *gorm.DB
 var Errors []string
 
-func DbConnect() {
+func Connect() {
 	var err error
 
 	dbCconfig := loadDatabaseConfigFile()
-	db, err = gorm.Open("postgres", stringfyDatabaseConfigFile(dbCconfig))
+	Conn, err = gorm.Open("postgres", stringfyDatabaseConfigFile(dbCconfig))
 
 	if err != nil {
 		log.Fatal.Println(err)
@@ -35,19 +35,19 @@ func DbConnect() {
 		log.Info.Printf("database pool of connections: %d", pool)
 	}
 
-	db.DB().SetMaxIdleConns(pool)
+	Conn.DB().SetMaxIdleConns(pool)
 }
 
-func DbDisconnect() {
-	defer db.Close()
+func Disconnect() {
+	defer Conn.Close()
 }
 
 func TableName(table interface{}) string {
-	return db.NewScope(table).GetModelStruct().TableName(db)
+	return Conn.NewScope(table).GetModelStruct().TableName(Conn)
 }
 
 func GetColumnType(table interface{}, columnName string) (string, error) {
-	field, ok := db.NewScope(table).FieldByName(columnName)
+	field, ok := Conn.NewScope(table).FieldByName(columnName)
 
 	if ok {
 		return field.Field.Type().String(), nil
@@ -57,7 +57,7 @@ func GetColumnType(table interface{}, columnName string) (string, error) {
 }
 
 func GetColumnValue(table interface{}, columnName string) (interface{}, error) {
-	field, ok := db.NewScope(table).FieldByName(columnName)
+	field, ok := Conn.NewScope(table).FieldByName(columnName)
 
 	if ok {
 		return field.Field.Interface(), nil
@@ -67,7 +67,7 @@ func GetColumnValue(table interface{}, columnName string) (interface{}, error) {
 }
 
 func SetColumnValue(table interface{}, columnName string, value string) error {
-	field, ok := db.NewScope(table).FieldByName(columnName)
+	field, ok := Conn.NewScope(table).FieldByName(columnName)
 
 	if ok {
 		columnType, _ := GetColumnType(table, columnName)
@@ -80,7 +80,7 @@ func SetColumnValue(table interface{}, columnName string, value string) error {
 
 func ColumnsFromTable(table interface{}, all bool) []string {
 	var columns []string
-	fields := db.NewScope(table).Fields()
+	fields := Conn.NewScope(table).Fields()
 
 	for _, field := range fields {
 		if !all && ((field.Names[0] == "Model") || (field.Relationship != nil)) {

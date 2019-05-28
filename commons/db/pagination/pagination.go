@@ -1,25 +1,27 @@
-package models
+package pagination
 
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"strconv"
+	"wheel.smart26.com/commons/db"
+	"wheel.smart26.com/commons/db/searchengine"
 )
 
 type Counter struct {
 	Entries int
 }
 
-func GenericPaginateQuery(table interface{}, criteria map[string]string, page interface{}, perPage interface{}) (*gorm.DB, int, int, int) {
+func Query(table interface{}, criteria map[string]string, page interface{}, perPage interface{}) (*gorm.DB, int, int, int) {
 	var currentPage, totalPages, entriesPerPage int
 	var counter Counter
 
 	currentPage = handleCurrentPage(page)
 	entriesPerPage = handleEntriesPerPage(perPage)
 
-	query, values := BuildSearchEngine(table, criteria, "AND")
+	query, values := searchengine.Query(table, criteria, "AND")
 
-	db.Table(TableName(table)).Select("COUNT(*) AS entries").Where(query, values...).Scan(&counter)
+	db.Conn.Table(db.TableName(table)).Select("COUNT(*) AS entries").Where(query, values...).Scan(&counter)
 
 	totalPages = counter.Entries / entriesPerPage
 	if (counter.Entries % entriesPerPage) > 0 {
@@ -27,7 +29,7 @@ func GenericPaginateQuery(table interface{}, criteria map[string]string, page in
 	}
 
 	offset := (currentPage - 1) * entriesPerPage
-	pagination := db.Offset(offset).Limit(entriesPerPage).Where(query, values...)
+	pagination := db.Conn.Offset(offset).Limit(entriesPerPage).Where(query, values...)
 
 	return pagination, currentPage, totalPages, counter.Entries
 }

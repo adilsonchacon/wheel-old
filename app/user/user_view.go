@@ -1,21 +1,22 @@
-package views
+package user
 
 import (
 	"time"
-	"wheel.smart26.com/app/models"
+	"wheel.smart26.com/app/entity"
+	"wheel.smart26.com/commons/view"
 )
 
-type UserPaginationJson struct {
-	Pagination MainPagination `json:"pagination"`
-	Users      []UserJson     `json:"users"`
+type PaginationJson struct {
+	Pagination view.MainPagination `json:"pagination"`
+	Users      []Json              `json:"users"`
 }
 
-type UserSuccessfullySavedJson struct {
-	SystemMessage SystemMessage `json:"system_message"`
-	User          UserJson      `json:"user"`
+type SuccessfullySavedJson struct {
+	SystemMessage view.SystemMessage `json:"system_message"`
+	User          Json               `json:"user"`
 }
 
-type UserJson struct {
+type Json struct {
 	ID        uint       `json:"id"`
 	Name      string     `json:"name"`
 	Email     string     `json:"email"`
@@ -26,8 +27,8 @@ type UserJson struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func SetUserJson(user models.User) UserJson {
-	return UserJson{
+func SetJson(user entity.User) Json {
+	return Json{
 		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,

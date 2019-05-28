@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"wheel.smart26.com/app/controllers"
-	"wheel.smart26.com/app/models"
-	"wheel.smart26.com/app/views"
+	"wheel.smart26.com/app/handler"
+	"wheel.smart26.com/app/user"
 	"wheel.smart26.com/commons/log"
+	"wheel.smart26.com/commons/view"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {
@@ -33,13 +33,15 @@ func authorizeMiddleware(next http.Handler) http.Handler {
 			if authorizeAdmin(token) {
 				next.ServeHTTP(w, r)
 			} else {
-				json.NewEncoder(w).Encode(views.SetNotFoundErrorMessage())
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(view.SetNotFoundErrorMessage())
 			}
 		} else if userUrl.MatchString(r.RequestURI) || sessionRefreshUrl.MatchString(r.RequestURI) {
 			if authorizeUser(token) {
 				next.ServeHTTP(w, r)
 			} else {
-				json.NewEncoder(w).Encode(views.SetNotFoundErrorMessage())
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(view.SetNotFoundErrorMessage())
 			}
 		} else {
 			next.ServeHTTP(w, r)
@@ -48,49 +50,59 @@ func authorizeMiddleware(next http.Handler) http.Handler {
 }
 
 func authorizeAdmin(token string) bool {
-	log.Info.Println("Checking token...")
-	id, err := controllers.SessionCheck(token)
-	if err != nil {
-		log.Info.Println("Token is not valid")
+	var id uint
+
+	id, ok := checkToken(token)
+	if !ok {
 		return false
+	}
+
+	log.Info.Printf("checking admin for user id: %d...\n", id)
+
+	authUser, err := user.Find(id)
+	if err == nil && authUser.Admin {
+		log.Info.Println("access granted to user")
+		return true
 	} else {
-		log.Info.Println("Token is valid")
-		log.Info.Printf("Checking user %d...\n", id)
-		user := models.UserFind(id)
-		if models.UserExists(user) {
-			if models.UserFind(id).Admin {
-				log.Info.Println("User authorized")
-				return true
-			} else {
-				log.Info.Println("User not authorized")
-				return false
-			}
-		} else {
-			log.Warn.Println("User does not exist")
-			return false
-		}
+		log.Info.Println("access denied to user")
+		return false
 	}
 }
 
 func authorizeUser(token string) bool {
-	log.Info.Println("Checking token...")
-	id, err := controllers.SessionCheck(token)
-	if err != nil {
-		log.Info.Println("Token is not valid")
+	var id uint
+
+	id, ok := checkToken(token)
+	if !ok {
 		return false
-	} else {
-		log.Info.Println("Token is valid")
-		log.Info.Printf("Checking user %d...\n", id)
-		user := models.UserFind(id)
-		if models.UserExists(user) {
-			models.UserSetCurrent(id)
-			log.Info.Println("User authorized")
-			return true
-		} else {
-			log.Warn.Println("User does not exist")
-			return false
-		}
 	}
+
+	log.Info.Printf("checking user id: %d...\n", id)
+
+	_, err := user.Find(id)
+	if err == nil {
+		user.SetCurrent(id)
+		log.Info.Println("access granted to user")
+		return true
+	} else {
+		log.Info.Println("access denied to user")
+		return false
+	}
+
+}
+
+func checkToken(token string) (uint, bool) {
+	log.Info.Println("checking token...")
+
+	id, err := handler.SessionCheck(token)
+	if err != nil {
+		log.Info.Println("invalid token")
+		return 0, false
+	} else {
+		log.Info.Println("token is valid")
+		return id, true
+	}
+
 }
 
 func filterParamsValues(queries map[string][]string) map[string][]string {

@@ -1,4 +1,4 @@
-package models
+package searchengine
 
 import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"wheel.smart26.com/commons/db"
 	"wheel.smart26.com/commons/log"
 )
 
-func BuildSearchEngine(table interface{}, criteria map[string]string, logic string) (string, []interface{}) {
+func Query(table interface{}, criteria map[string]string, logic string) (string, []interface{}) {
 	var queries []string
 	var values []interface{}
 	var query string
@@ -34,6 +35,38 @@ func BuildSearchEngine(table interface{}, criteria map[string]string, logic stri
 	query = strings.Join(queries, " "+logic+" ")
 
 	return query, values
+}
+
+func handleCriterion(table interface{}, key string, value string) (string, interface{}, error) {
+	var column, columnType, query string
+	var interfaceValue interface{}
+	var regexpInclusionQuery = regexp.MustCompile(`IN\s\(\?\)`)
+	var regexpIsNullQuery = regexp.MustCompile(`IS\s(NOT\s){0,1}NULL`)
+	var err error
+
+	names := strings.Split(key, "_")
+
+	column, query = strings.Join(names[:len(names)-1], "_"), names[len(names)-1]
+
+	columnType, err = db.GetColumnType(table, column)
+	if err != nil {
+		log.Error.Println("handleCriterion", err)
+		return "", "", err
+	}
+
+	query, value = translateQuery(column, query, value)
+
+	if regexpIsNullQuery.MatchString(query) {
+		interfaceValue = 1
+	} else {
+		interfaceValue, err = valueToInterface(columnType, value, regexpInclusionQuery.MatchString(query))
+		if err != nil {
+			log.Error.Println("handleCriterion", err)
+			return "", "", err
+		}
+	}
+
+	return query, interfaceValue, nil
 }
 
 func valueToInterface(columnType string, valueContent string, isQueryInclusion bool) (interface{}, error) {
@@ -75,38 +108,6 @@ func valueToInterface(columnType string, valueContent string, isQueryInclusion b
 	return returnValue, err
 }
 
-func handleCriterion(table interface{}, key string, value string) (string, interface{}, error) {
-	var column, columnType, query string
-	var interfaceValue interface{}
-	var regexpInclusionQuery = regexp.MustCompile(`IN\s\(\?\)`)
-	var regexpIsNullQuery = regexp.MustCompile(`IS\s(NOT\s){0,1}NULL`)
-	var err error
-
-	names := strings.Split(key, "_")
-
-	column, query = strings.Join(names[:len(names)-1], "_"), names[len(names)-1]
-
-	columnType, err = GetColumnType(table, column)
-	if err != nil {
-		log.Error.Println("handleCriterion", err)
-		return "", "", err
-	}
-
-	query, value = translateQuery(column, query, value)
-
-	if regexpIsNullQuery.MatchString(query) {
-		interfaceValue = 1
-	} else {
-		interfaceValue, err = valueToInterface(columnType, value, regexpInclusionQuery.MatchString(query))
-		if err != nil {
-			log.Error.Println("handleCriterion", err)
-			return "", "", err
-		}
-	}
-
-	return query, interfaceValue, nil
-}
-
 func translateQuery(column string, query string, value string) (string, string) {
 	switch query {
 	case "cont":
@@ -146,9 +147,11 @@ func translateQuery(column string, query string, value string) (string, string) 
 	case "notin":
 		query = "NOT IN (?)"
 	case "true":
-		query = " = 't'"
+		query = "= 't'"
 	case "false":
-		query = " = 'f'"
+		query = "= 'f'"
+	case "noteq":
+		query = "<> ?"
 	default:
 		query = "= ?"
 	}
