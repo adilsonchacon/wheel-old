@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"net/http"
-	"wheel.smart26.com/app/migration"
 	"wheel.smart26.com/commons/app/model"
 	"wheel.smart26.com/commons/log"
 	"wheel.smart26.com/config"
+	"wheel.smart26.com/db/schema"
 	"wheel.smart26.com/routes"
 )
 
@@ -25,7 +25,7 @@ func main() {
 	model.Connect()
 
 	if mode == "migrate" {
-		migration.Run()
+		schema.Migrate()
 	} else if mode == "s" || mode == "server" {
 		log.Fatal.Println(http.ListenAndServe(host+":"+port, routes.Routes(host, port)))
 	} else {

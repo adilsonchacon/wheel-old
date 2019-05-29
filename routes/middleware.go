@@ -3,9 +3,11 @@ package routes
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"regexp"
 	"strings"
+	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/app/handler"
 	"wheel.smart26.com/app/user"
 	"wheel.smart26.com/commons/app/view"
@@ -15,94 +17,78 @@ import (
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Info.Println(r.Method + ": " + filterUrlValues(r.URL.Path, r.URL.Query()) + " for " + r.RemoteAddr)
-		r.ParseForm()
+		r.ParseMultipartForm(100 * 1024)
 		log.Info.Println("Params: " + filterFormValues(r.Form))
 		next.ServeHTTP(w, r)
 	})
 }
 
 func authorizeMiddleware(next http.Handler) http.Handler {
-	var adminUrl = regexp.MustCompile(`^\/user(s){0,1}`)
-	var userUrl = regexp.MustCompile(`^\/myself`)
-	var sessionRefreshUrl = regexp.MustCompile(`^\/sessions\/refresh`)
+	var userId uint
+	var err error
+	var userRole string
+	var signedInUser entity.User
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("token")
+		userId = 0
+		err = nil
+		userRole = "public"
 
-		if adminUrl.MatchString(r.RequestURI) {
-			if authorizeAdmin(token) {
-				next.ServeHTTP(w, r)
-			} else {
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(view.SetNotFoundErrorMessage())
+		userId, err = checkToken(r.Header.Get("token"))
+		if err == nil {
+			if signedInUser, err = checkSignedInUser(userId); err == nil {
+				userRole = "signed_in"
 			}
-		} else if userUrl.MatchString(r.RequestURI) || sessionRefreshUrl.MatchString(r.RequestURI) {
-			if authorizeUser(token) {
-				next.ServeHTTP(w, r)
-			} else {
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(view.SetNotFoundErrorMessage())
+
+			if userRole == "signed_in" && checkAdminUser(user.Current) {
+				userRole = "admin"
 			}
-		} else {
+		}
+
+		if GrantPermission(r.RequestURI, r.Method, userRole) {
 			next.ServeHTTP(w, r)
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(view.SetNotFoundErrorMessage())
 		}
 	})
 }
 
-func authorizeAdmin(token string) bool {
-	var id uint
-
-	id, ok := checkToken(token)
-	if !ok {
-		return false
-	}
-
-	log.Info.Printf("checking admin for user id: %d...\n", id)
-
-	authUser, err := user.Find(id)
-	if err == nil && authUser.Admin {
-		log.Info.Println("access granted to user")
+func checkAdminUser(signedInUser entity.User) bool {
+	if signedInUser.Admin {
+		log.Info.Println("admin access granted to user")
 		return true
 	} else {
-		log.Info.Println("access denied to user")
+		log.Info.Println("admin access denied to user")
 		return false
 	}
 }
 
-func authorizeUser(token string) bool {
-	var id uint
+func checkSignedInUser(userId uint) (entity.User, error) {
+	log.Info.Printf("checking user id: %d...\n", userId)
 
-	id, ok := checkToken(token)
-	if !ok {
-		return false
-	}
-
-	log.Info.Printf("checking user id: %d...\n", id)
-
-	_, err := user.Find(id)
-	if err == nil {
-		user.SetCurrent(id)
-		log.Info.Println("access granted to user")
-		return true
+	if signedInUser, err := user.Find(userId); err == nil {
+		user.SetCurrent(userId)
+		log.Info.Println("user was found")
+		return signedInUser, nil
 	} else {
-		log.Info.Println("access denied to user")
-		return false
+		log.Info.Println("user was not found")
+		return signedInUser, errors.New("user was not found")
 	}
-
 }
 
-func checkToken(token string) (uint, bool) {
+func checkToken(token string) (uint, error) {
 	log.Info.Println("checking token...")
 
-	id, err := handler.SessionCheck(token)
-	if err != nil {
-		log.Info.Println("invalid token")
-		return 0, false
-	} else {
-		log.Info.Println("token is valid")
-		return id, true
-	}
+	userId, err := handler.SessionCheck(token)
 
+	if err == nil {
+		log.Info.Println("token is valid")
+		return userId, nil
+	} else {
+		log.Info.Println("invalid token")
+		return 0, errors.New("invalid token")
+	}
 }
 
 func filterParamsValues(queries map[string][]string) map[string][]string {

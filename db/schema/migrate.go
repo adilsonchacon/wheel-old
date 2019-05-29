@@ -1,4 +1,4 @@
-package migration
+package schema
 
 import (
 	"wheel.smart26.com/app/entity"
@@ -7,7 +7,7 @@ import (
 	"wheel.smart26.com/commons/crypto"
 )
 
-func Run() {
+func Migrate() {
 	model.Db.AutoMigrate(&entity.User{})
 
 	_, err := user.FindByEmail("wheel@smart26.com")

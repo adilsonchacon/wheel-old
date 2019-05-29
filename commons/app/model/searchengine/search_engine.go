@@ -28,7 +28,7 @@ func Query(table interface{}, criteria map[string]string, logic string) (string,
 			}
 
 		} else {
-			log.Error.Println("BuildSearchEngine", err)
+			log.Error.Println("SearchEngine Query", err)
 		}
 	}
 
@@ -50,7 +50,7 @@ func handleCriterion(table interface{}, key string, value string) (string, inter
 
 	columnType, err = model.GetColumnType(table, column)
 	if err != nil {
-		log.Error.Println("handleCriterion", err)
+		log.Error.Println("SearchEngine handleCriterion", err)
 		return "", "", err
 	}
 
@@ -61,7 +61,7 @@ func handleCriterion(table interface{}, key string, value string) (string, inter
 	} else {
 		interfaceValue, err = valueToInterface(columnType, value, regexpInclusionQuery.MatchString(query))
 		if err != nil {
-			log.Error.Println("handleCriterion", err)
+			log.Error.Println("SearchEngine handleCriterion", err)
 			return "", "", err
 		}
 	}
