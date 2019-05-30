@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/app/handler"
 	"wheel.smart26.com/app/user"
 	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
+	"wheel.smart26.com/db/entity"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {

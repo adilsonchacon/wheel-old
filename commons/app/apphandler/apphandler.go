@@ -1,4 +1,4 @@
-package controller
+package apphandler
 
 import (
 	"encoding/json"

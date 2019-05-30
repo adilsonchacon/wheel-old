@@ -4,18 +4,18 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
-	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/app/user"
-	"wheel.smart26.com/commons/app/controller"
+	"wheel.smart26.com/commons/app/apphandler"
 	"wheel.smart26.com/commons/app/model"
 	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
+	"wheel.smart26.com/db/entity"
 )
 
 func UserCreate(w http.ResponseWriter, r *http.Request) {
 	var newUser = entity.User{}
 
-	log.Info.Println("Handler: Create")
+	log.Info.Println("Handler: UserCreate")
 	w.Header().Set("Content-Type", "application/json")
 
 	userSetParams(&newUser, r)
@@ -66,7 +66,7 @@ func UserDestroy(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserShow(w http.ResponseWriter, r *http.Request) {
-	log.Info.Println("controllers: UserShow")
+	log.Info.Println("Handler: UserShow")
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
@@ -84,7 +84,7 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 	var userJsons []user.Json
 	var userList []entity.User
 
-	log.Info.Println("controllers: UserList")
+	log.Info.Println("Handler: UserList")
 	w.Header().Set("Content-Type", "application/json")
 
 	normalizedParams := controller.NormalizeUrlQueryParams("search", r.URL.Query())

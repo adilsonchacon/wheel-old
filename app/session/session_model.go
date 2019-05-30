@@ -3,8 +3,8 @@ package session
 import (
 	"errors"
 	"time"
-	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/commons/app/model"
+	"wheel.smart26.com/db/entity"
 )
 
 const NotFound = "session was not found"

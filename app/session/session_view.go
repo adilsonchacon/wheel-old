@@ -3,11 +3,11 @@ package session
 import (
 	"bytes"
 	"html/template"
-	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/app/user"
 	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
 	"wheel.smart26.com/config"
+	"wheel.smart26.com/db/entity"
 )
 
 type SignInSuccess struct {

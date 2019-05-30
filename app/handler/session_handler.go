@@ -10,7 +10,6 @@ import (
 	"net"
 	"net/http"
 	"time"
-	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/app/session"
 	"wheel.smart26.com/app/user"
 	"wheel.smart26.com/commons/app/view"
@@ -18,6 +17,7 @@ import (
 	"wheel.smart26.com/commons/log"
 	"wheel.smart26.com/commons/mailer"
 	"wheel.smart26.com/config"
+	"wheel.smart26.com/db/entity"
 )
 
 type SessionClaims struct {
@@ -32,7 +32,7 @@ const (
 )
 
 func SessionSignIn(w http.ResponseWriter, r *http.Request) {
-	log.Info.Println("controllers: SessionSingIn")
+	log.Info.Println("Handler: SessionSingIn")
 	w.Header().Set("Content-Type", "application/json")
 
 	userAuth, err := user.Authenticate(r.FormValue("email"), r.FormValue("password"))
@@ -45,7 +45,7 @@ func SessionSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func SessionSignOut(w http.ResponseWriter, r *http.Request) {
-	log.Info.Println("controllers: SessionSignOut")
+	log.Info.Println("Handler: SessionSignOut")
 	w.Header().Set("Content-Type", "application/json")
 
 	authToken, _ := sessionAuthToken(r.Header.Get("token"))
@@ -70,7 +70,7 @@ func SessionSignOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func SessionRefresh(w http.ResponseWriter, r *http.Request) {
-	log.Info.Println("controllers: SessionRefresh")
+	log.Info.Println("Handler: SessionRefresh")
 	w.Header().Set("Content-Type", "application/json")
 
 	authToken, _ := sessionAuthToken(r.Header.Get("token"))
@@ -109,7 +109,7 @@ func SessionRefresh(w http.ResponseWriter, r *http.Request) {
 func SessionSignUp(w http.ResponseWriter, r *http.Request) {
 	var newUser = entity.User{}
 
-	log.Info.Println("controllers: SessionSignUp")
+	log.Info.Println("Handler: SessionSignUp")
 	w.Header().Set("Content-Type", "application/json")
 
 	userSetParams(&newUser, r)
@@ -132,7 +132,7 @@ func SessionSignUp(w http.ResponseWriter, r *http.Request) {
 func SessionPassword(w http.ResponseWriter, r *http.Request) {
 	var currentUser, _ = user.FindByEmail(r.FormValue("email"))
 
-	log.Info.Println("controllers: SessionPassword")
+	log.Info.Println("Handler: SessionPassword")
 	w.Header().Set("Content-Type", "application/json")
 
 	if user.Exists(&currentUser) {
@@ -152,7 +152,7 @@ func SessionRecovery(w http.ResponseWriter, r *http.Request) {
 	var errs []error
 	var valid bool
 
-	log.Info.Println("controllers: SessionRecovery")
+	log.Info.Println("Handler: SessionRecovery")
 	w.Header().Set("Content-Type", "application/json")
 
 	currentUser, _ := user.FindByResetPasswordToken(r.Header.Get("token"))

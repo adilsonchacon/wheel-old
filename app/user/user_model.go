@@ -5,11 +5,11 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/commons/app/model"
 	"wheel.smart26.com/commons/app/model/pagination"
 	"wheel.smart26.com/commons/crypto"
 	"wheel.smart26.com/config"
+	"wheel.smart26.com/db/entity"
 )
 
 const NotFound = "user was not found"

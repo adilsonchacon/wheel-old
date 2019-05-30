@@ -1,10 +1,10 @@
 package schema
 
 import (
-	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/app/user"
 	"wheel.smart26.com/commons/app/model"
 	"wheel.smart26.com/commons/crypto"
+	"wheel.smart26.com/db/entity"
 )
 
 func Migrate() {

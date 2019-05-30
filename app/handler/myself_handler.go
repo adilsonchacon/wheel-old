@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/app/myself"
 	"wheel.smart26.com/app/user"
 	"wheel.smart26.com/commons/app/model"
 	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
+	"wheel.smart26.com/db/entity"
 )
 
 func MyselfUpdate(w http.ResponseWriter, r *http.Request) {
-	log.Info.Println("controllers: MyselfUpdate")
+	log.Info.Println("Handler: MyselfUpdate")
 	w.Header().Set("Content-Type", "application/json")
 
 	userMyself := user.Current
@@ -31,7 +31,7 @@ func MyselfUpdatePassword(w http.ResponseWriter, r *http.Request) {
 	var errs []error
 	var valid bool
 
-	log.Info.Println("controllers: MyselfChangePassword")
+	log.Info.Println("Handler: MyselfChangePassword")
 	w.Header().Set("Content-Type", "application/json")
 
 	userMyself := user.Current
@@ -51,7 +51,7 @@ func MyselfUpdatePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func MyselfDestroy(w http.ResponseWriter, r *http.Request) {
-	log.Info.Println("Controller: MyselfDestroy")
+	log.Info.Println("Handler: MyselfDestroy")
 	w.Header().Set("Content-Type", "application/json")
 
 	userMyself := user.Current
@@ -64,7 +64,7 @@ func MyselfDestroy(w http.ResponseWriter, r *http.Request) {
 }
 
 func MyselfShow(w http.ResponseWriter, r *http.Request) {
-	log.Info.Println("controllers: MyselfShow")
+	log.Info.Println("Handler: MyselfShow")
 	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(myself.SetJson(user.Current))

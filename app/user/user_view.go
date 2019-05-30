@@ -2,8 +2,8 @@ package user
 
 import (
 	"time"
-	"wheel.smart26.com/app/entity"
 	"wheel.smart26.com/commons/app/view"
+	"wheel.smart26.com/db/entity"
 )
 
 type PaginationJson struct {
