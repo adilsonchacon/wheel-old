@@ -1,34 +1,190 @@
 package main
 
 import (
-	"flag"
-	"net/http"
-	"wheel.smart26.com/commons/app/model"
-	"wheel.smart26.com/commons/log"
-	"wheel.smart26.com/config"
-	"wheel.smart26.com/db/schema"
-	"wheel.smart26.com/routes"
+	"bytes"
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"os/user"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
-	var mode string
-	var port string
-	var host string
+	var out bytes.Buffer
+	var hasDependence bool
 
-	flag.StringVar(&mode, "mode", "server", "run mode (options: server/migrate)")
-	flag.StringVar(&host, "host", "localhost", "http server host")
-	flag.StringVar(&port, "port", "8081", "http server port")
-	flag.Parse()
+	command := os.Args[1]
+	fmt.Println("command:", command)
+	appName := os.Args[2]
 
-	log.Info.Println("starting app", config.AppName())
+	// TODO: if command == new ... else if ... else ...
 
-	model.Connect()
-
-	if mode == "migrate" {
-		schema.Migrate()
-	} else if mode == "s" || mode == "server" {
-		log.Fatal.Println(http.ListenAndServe(host+":"+port, routes.Routes(host, port)))
-	} else {
-		log.Fatal.Println("invalid run mode, please, use \"--help\" for more details")
+	cmd := exec.Command("go", "version")
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		fmt.Println(err)
+		log.Fatal("\"Go\" seems not installed")
 	}
+
+	cmd = exec.Command("go", "list", "...")
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		fmt.Println(err)
+		log.Fatal("\"Go\" seems not installed")
+	}
+	installedDependences := strings.Split(out.String(), "\n")
+
+	requiredDependences := []string{"github.com/jinzhu/gorm", "gopkg.in/yaml.v2", "github.com/gorilla/mux", "github.com/dgrijalva/jwt-go", "github.com/satori/go.uuid", "github.com/lib/pq", "golang.org/x/crypto/bcrypt"}
+	for _, requiredDependence := range requiredDependences {
+		hasDependence = false
+		for _, installedDependence := range installedDependences {
+			hasDependence = (requiredDependence == installedDependence)
+			if hasDependence {
+				break
+			}
+		}
+
+		if !hasDependence {
+			fmt.Printf("package %s was not found, installing...\n", requiredDependence)
+			cmd := exec.Command("go", "get", requiredDependence)
+			cmd.Stdout = &out
+			if err := cmd.Run(); err != nil {
+				log.Fatal(err)
+			} else {
+				fmt.Printf("package %s was successfully installed\n", requiredDependence)
+			}
+		} else {
+			fmt.Printf("package %s was found\n", requiredDependence)
+		}
+	}
+
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("ignore:", dir)
+
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rootAppPath := filepath.Join(usr.HomeDir, "go", "src", appName)
+	if err := os.MkdirAll(goPath, 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "app", "handlers"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "app", "myself"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "app", "session"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "app", "session", "mailer"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "app", "user"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "handler"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "model"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "model", "pagination"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "model", "searchengine"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "view"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "conversor"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "crypto"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "locale"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "log"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "commons", "mailer"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "config"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "config", "keys"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "config", "locales"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "db"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "db", "entities"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "db", "schema"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "log"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(goPath, "routes"), 0775); err != nil {
+		log.Fatal(err)
+	}
+
 }
+
+/*
+
+wheel new APP_NAME
+
+- check whether go is installed, if don't alert and stop running
+- check whether wheel's go packages are installed, for each if don't install it
+- check "HOME_DIR -> go" folder exists, otherwise create it
+
+*/
+
+/*
+  -h, [--help]        # Show this help message and quit
+  -v, [--version]     # Show Wheel version number and quit
+*/
+
+/*
+  -G, [--skip-git]    # Skip .gitignore file
+*/
