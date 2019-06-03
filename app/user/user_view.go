@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 	"wheel.smart26.com/commons/app/view"
-	"wheel.smart26.com/db/entity"
+	"wheel.smart26.com/db/entities"
 )
 
 type PaginationJson struct {
@@ -27,7 +27,7 @@ type Json struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func SetJson(user entity.User) Json {
+func SetJson(user entities.User) Json {
 	return Json{
 		ID:        user.ID,
 		Name:      user.Name,

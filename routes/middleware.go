@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"wheel.smart26.com/app/handler"
+	"wheel.smart26.com/app/handlers"
 	"wheel.smart26.com/app/user"
 	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
-	"wheel.smart26.com/db/entity"
+	"wheel.smart26.com/db/entities"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {
@@ -27,7 +27,7 @@ func authorizeMiddleware(next http.Handler) http.Handler {
 	var userId uint
 	var err error
 	var userRole string
-	var signedInUser entity.User
+	var signedInUser entities.User
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userId = 0
@@ -54,7 +54,7 @@ func authorizeMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func checkAdminUser(signedInUser entity.User) bool {
+func checkAdminUser(signedInUser entities.User) bool {
 	if signedInUser.Admin {
 		log.Info.Println("admin access granted to user")
 		return true
@@ -64,7 +64,7 @@ func checkAdminUser(signedInUser entity.User) bool {
 	}
 }
 
-func checkSignedInUser(userId uint) (entity.User, error) {
+func checkSignedInUser(userId uint) (entities.User, error) {
 	log.Info.Printf("checking user id: %d...\n", userId)
 
 	if signedInUser, err := user.Find(userId); err == nil {
@@ -80,7 +80,7 @@ func checkSignedInUser(userId uint) (entity.User, error) {
 func checkToken(token string) (uint, error) {
 	log.Info.Println("checking token...")
 
-	userId, err := handler.SessionCheck(token)
+	userId, err := handlers.SessionCheck(token)
 
 	if err == nil {
 		log.Info.Println("token is valid")

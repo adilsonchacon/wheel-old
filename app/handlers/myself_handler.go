@@ -1,4 +1,4 @@
-package handler
+package handlers
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"wheel.smart26.com/commons/app/model"
 	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
-	"wheel.smart26.com/db/entity"
+	"wheel.smart26.com/db/entities"
 )
 
 func MyselfUpdate(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +70,7 @@ func MyselfShow(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(myself.SetJson(user.Current))
 }
 
-func myselfSetParams(userMyself *entity.User, r *http.Request) {
+func myselfSetParams(userMyself *entities.User, r *http.Request) {
 	var allowedParams = []string{"name", "locale"}
 
 	r.ParseForm()

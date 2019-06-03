@@ -7,7 +7,7 @@ import (
 	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
 	"wheel.smart26.com/config"
-	"wheel.smart26.com/db/entity"
+	"wheel.smart26.com/db/entities"
 )
 
 type SignInSuccess struct {
@@ -46,7 +46,7 @@ func SignUpSuccessMessage(mType string, content string, token string) SignInSucc
 	return SignInSuccessMessage(mType, content, token)
 }
 
-func SignUpMailer(currentUser *entity.User) string {
+func SignUpMailer(currentUser *entities.User) string {
 	var content bytes.Buffer
 
 	data := SignUpSuccess{UserFirstName: user.FirstName(currentUser), AppName: config.AppName()}
@@ -61,7 +61,7 @@ func SignUpMailer(currentUser *entity.User) string {
 	return content.String()
 }
 
-func PasswordRecoveryInstructionsMailer(currentUser *entity.User, token string) string {
+func PasswordRecoveryInstructionsMailer(currentUser *entities.User, token string) string {
 	var content bytes.Buffer
 
 	data := PasswordRecoveryInstructions{UserFirstName: user.FirstName(currentUser), LinkToPasswordRecovery: config.ResetPasswordUrl() + "?token=" + token}

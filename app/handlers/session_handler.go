@@ -1,4 +1,4 @@
-package handler
+package handlers
 
 import (
 	"crypto/rsa"
@@ -17,7 +17,7 @@ import (
 	"wheel.smart26.com/commons/log"
 	"wheel.smart26.com/commons/mailer"
 	"wheel.smart26.com/config"
-	"wheel.smart26.com/db/entity"
+	"wheel.smart26.com/db/entities"
 )
 
 type SessionClaims struct {
@@ -107,7 +107,7 @@ func SessionRefresh(w http.ResponseWriter, r *http.Request) {
 }
 
 func SessionSignUp(w http.ResponseWriter, r *http.Request) {
-	var newUser = entity.User{}
+	var newUser = entities.User{}
 
 	log.Info.Println("Handler: SessionSignUp")
 	w.Header().Set("Content-Type", "application/json")
@@ -187,7 +187,7 @@ func SessionCheck(token string) (uint, error) {
 	}
 }
 
-func sessionBuildClaims(jti string, userSession *entity.User) (jwt.MapClaims, time.Time) {
+func sessionBuildClaims(jti string, userSession *entities.User) (jwt.MapClaims, time.Time) {
 	expiresAt := time.Now().Add(time.Second * time.Duration(config.TokenExpirationSeconds()))
 
 	claims := make(jwt.MapClaims)
@@ -241,12 +241,12 @@ func sessionAuthToken(token string) (*jwt.Token, error) {
 	return authToken, err
 }
 
-func sessionGenerateToken(userSession entity.User, remoteAddr string) string {
+func sessionGenerateToken(userSession entities.User, remoteAddr string) string {
 	var privateBytes []byte
 	var privateKey *rsa.PrivateKey
 	var err error
 	var expiresAt time.Time
-	var sessionNew entity.Session
+	var sessionNew entities.Session
 
 	privateBytes, err = ioutil.ReadFile(privateKeyPath)
 	if err != nil {
@@ -272,7 +272,7 @@ func sessionGenerateToken(userSession entity.User, remoteAddr string) string {
 
 	t := time.Now()
 	ip, _, _ := net.SplitHostPort(remoteAddr)
-	sessionNew = entity.Session{Jti: jti, App: "Default", Requests: 0, LastRequestAt: &t, UserID: userSession.ID, Address: ip, ExpiresIn: config.TokenExpirationSeconds(), ExpiresAt: expiresAt}
+	sessionNew = entities.Session{Jti: jti, App: "Default", Requests: 0, LastRequestAt: &t, UserID: userSession.ID, Address: ip, ExpiresIn: config.TokenExpirationSeconds(), ExpiresAt: expiresAt}
 	session.Save(&sessionNew)
 
 	return token
