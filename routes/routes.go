@@ -3,15 +3,15 @@ package routes
 import (
 	"github.com/gorilla/mux"
 	"net/http"
-	"wheel.smart26.com/app/handler"
-	"wheel.smart26.com/commons/app/controller"
+	"wheel.smart26.com/app/handlers"
+	"wheel.smart26.com/commons/app/handler"
 	"wheel.smart26.com/commons/log"
 )
 
 func Routes(host string, port string) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.NotFoundHandler = http.HandlerFunc(controller.Error404)
+	router.NotFoundHandler = http.HandlerFunc(handler.Error404)
 
 	// middlewares
 	log.Info.Println("setting up middlewares")
@@ -20,25 +20,25 @@ func Routes(host string, port string) *mux.Router {
 
 	log.Info.Println("setting up routes")
 	// sessions
-	router.HandleFunc("/sessions/sign_in", handler.SessionSignIn).Methods("POST")
-	router.HandleFunc("/sessions/sign_out", handler.SessionSignOut).Methods("DELETE")
-	router.HandleFunc("/sessions/sign_up", handler.SessionSignUp).Methods("POST")
-	router.HandleFunc("/sessions/password", handler.SessionPassword).Methods("POST")
-	router.HandleFunc("/sessions/password", handler.SessionRecovery).Methods("PUT")
-	router.HandleFunc("/sessions/refresh", handler.SessionRefresh).Methods("POST")
+	router.HandleFunc("/sessions/sign_in", handlers.SessionSignIn).Methods("POST")
+	router.HandleFunc("/sessions/sign_out", handlers.SessionSignOut).Methods("DELETE")
+	router.HandleFunc("/sessions/sign_up", handlers.SessionSignUp).Methods("POST")
+	router.HandleFunc("/sessions/password", handlers.SessionPassword).Methods("POST")
+	router.HandleFunc("/sessions/password", handlers.SessionRecovery).Methods("PUT")
+	router.HandleFunc("/sessions/refresh", handlers.SessionRefresh).Methods("POST")
 
 	// user
-	router.HandleFunc("/myself", handler.MyselfShow).Methods("GET")
-	router.HandleFunc("/myself", handler.MyselfUpdate).Methods("PUT")
-	router.HandleFunc("/myself/password", handler.MyselfUpdatePassword).Methods("PUT")
-	router.HandleFunc("/myself/destroy", handler.MyselfDestroy).Methods("DELETE")
+	router.HandleFunc("/myself", handlers.MyselfShow).Methods("GET")
+	router.HandleFunc("/myself", handlers.MyselfUpdate).Methods("PUT")
+	router.HandleFunc("/myself/password", handlers.MyselfUpdatePassword).Methods("PUT")
+	router.HandleFunc("/myself/destroy", handlers.MyselfDestroy).Methods("DELETE")
 
 	// admin
-	router.HandleFunc("/users", handler.UserList).Methods("GET")
-	router.HandleFunc("/users/{id}", handler.UserShow).Methods("GET")
-	router.HandleFunc("/users", handler.UserCreate).Methods("POST")
-	router.HandleFunc("/users/{id}", handler.UserUpdate).Methods("PUT")
-	router.HandleFunc("/users/{id}", handler.UserDestroy).Methods("DELETE")
+	router.HandleFunc("/users", handlers.UserList).Methods("GET")
+	router.HandleFunc("/users/{id}", handlers.UserShow).Methods("GET")
+	router.HandleFunc("/users", handlers.UserCreate).Methods("POST")
+	router.HandleFunc("/users/{id}", handlers.UserUpdate).Methods("PUT")
+	router.HandleFunc("/users/{id}", handlers.UserDestroy).Methods("DELETE")
 
 	log.Info.Println("listening on " + host + ":" + port + ", CTRL+C to stop")
 

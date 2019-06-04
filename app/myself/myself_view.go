@@ -2,7 +2,7 @@ package myself
 
 import (
 	"time"
-	"wheel.smart26.com/db/entity"
+	"wheel.smart26.com/db/entities"
 )
 
 type Json struct {
@@ -13,7 +13,7 @@ type Json struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func SetJson(userMyself entity.User) Json {
+func SetJson(userMyself entities.User) Json {
 	return Json{
 		ID:        userMyself.ID,
 		Name:      userMyself.Name,

@@ -1,19 +1,19 @@
-package handler
+package handlers
 
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
 	"wheel.smart26.com/app/user"
-	"wheel.smart26.com/commons/app/apphandler"
+	"wheel.smart26.com/commons/app/handler"
 	"wheel.smart26.com/commons/app/model"
 	"wheel.smart26.com/commons/app/view"
 	"wheel.smart26.com/commons/log"
-	"wheel.smart26.com/db/entity"
+	"wheel.smart26.com/db/entities"
 )
 
 func UserCreate(w http.ResponseWriter, r *http.Request) {
-	var newUser = entity.User{}
+	var newUser = entities.User{}
 
 	log.Info.Println("Handler: UserCreate")
 	w.Header().Set("Content-Type", "application/json")
@@ -82,12 +82,12 @@ func UserShow(w http.ResponseWriter, r *http.Request) {
 func UserList(w http.ResponseWriter, r *http.Request) {
 	var i, page, entries, pages int
 	var userJsons []user.Json
-	var userList []entity.User
+	var userList []entities.User
 
 	log.Info.Println("Handler: UserList")
 	w.Header().Set("Content-Type", "application/json")
 
-	normalizedParams := controller.NormalizeUrlQueryParams("search", r.URL.Query())
+	normalizedParams := handler.NormalizeUrlQueryParams("search", r.URL.Query())
 
 	userList, page, pages, entries = user.Paginate(normalizedParams, r.FormValue("page"), r.FormValue("per_page"))
 
@@ -99,7 +99,7 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user.PaginationJson{Pagination: pagination, Users: userJsons})
 }
 
-func userSetParams(userSet *entity.User, r *http.Request) {
+func userSetParams(userSet *entities.User, r *http.Request) {
 	var allowedParams = []string{"name", "email", "password", "admin", "locale"}
 
 	r.ParseForm()

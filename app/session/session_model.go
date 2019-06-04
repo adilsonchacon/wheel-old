@@ -4,13 +4,13 @@ import (
 	"errors"
 	"time"
 	"wheel.smart26.com/commons/app/model"
-	"wheel.smart26.com/db/entity"
+	"wheel.smart26.com/db/entities"
 )
 
 const NotFound = "session was not found"
 
-func Find(id interface{}) (entity.Session, error) {
-	var session entity.Session
+func Find(id interface{}) (entities.Session, error) {
+	var session entities.Session
 	var err error
 
 	model.Db.First(&session, id)
@@ -21,11 +21,11 @@ func Find(id interface{}) (entity.Session, error) {
 	return session, err
 }
 
-func IsValid(session *entity.Session) (bool, []error) {
+func IsValid(session *entities.Session) (bool, []error) {
 	return true, []error{}
 }
 
-func Update(session *entity.Session) (bool, []error) {
+func Update(session *entities.Session) (bool, []error) {
 	var newValue, currentValue interface{}
 	var valid bool
 	var errs []error
@@ -59,7 +59,7 @@ func Update(session *entity.Session) (bool, []error) {
 	return valid, errs
 }
 
-func Create(session *entity.Session) (bool, []error) {
+func Create(session *entities.Session) (bool, []error) {
 	valid, errs := IsValid(session)
 	if valid && model.Db.NewRecord(session) {
 		model.Db.Create(&session)
@@ -73,7 +73,7 @@ func Create(session *entity.Session) (bool, []error) {
 	return valid, errs
 }
 
-func Save(session *entity.Session) (bool, []error) {
+func Save(session *entities.Session) (bool, []error) {
 	if model.Db.NewRecord(session) {
 		return Create(session)
 	} else {
@@ -81,7 +81,7 @@ func Save(session *entity.Session) (bool, []error) {
 	}
 }
 
-func Destroy(session *entity.Session) bool {
+func Destroy(session *entities.Session) bool {
 	if model.Db.NewRecord(session) {
 		return false
 	} else {
@@ -90,25 +90,25 @@ func Destroy(session *entity.Session) bool {
 	}
 }
 
-func FindByJti(jti string) (entity.Session, error) {
-	var session entity.Session
+func FindByJti(jti string) (entities.Session, error) {
+	var session entities.Session
 	var err error
 
 	model.Db.Where("jti = ?", jti).First(&session)
 	if model.Db.NewRecord(session) {
-		session = entity.Session{}
+		session = entities.Session{}
 		err = errors.New(NotFound)
 	}
 
 	return session, err
 }
 
-func Deactivate(session *entity.Session) (bool, []error) {
+func Deactivate(session *entities.Session) (bool, []error) {
 	session.Active = false
 	return Save(session)
 }
 
-func IncrementStats(session *entity.Session) (bool, []error) {
+func IncrementStats(session *entities.Session) (bool, []error) {
 	t := time.Now()
 	session.LastRequestAt = &t
 	session.Requests = session.Requests + 1

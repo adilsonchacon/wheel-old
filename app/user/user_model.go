@@ -9,15 +9,15 @@ import (
 	"wheel.smart26.com/commons/app/model/pagination"
 	"wheel.smart26.com/commons/crypto"
 	"wheel.smart26.com/config"
-	"wheel.smart26.com/db/entity"
+	"wheel.smart26.com/db/entities"
 )
 
 const NotFound = "user was not found"
 
-var Current entity.User
+var Current entities.User
 
-func Find(id interface{}) (entity.User, error) {
-	var user entity.User
+func Find(id interface{}) (entities.User, error) {
+	var user entities.User
 	var err error
 
 	model.Db.First(&user, id, "deleted_at IS NULL")
@@ -28,15 +28,15 @@ func Find(id interface{}) (entity.User, error) {
 	return user, err
 }
 
-func FindAll() []entity.User {
-	var users []entity.User
+func FindAll() []entities.User {
+	var users []entities.User
 
 	model.Db.Order("name").Find(&users, "deleted_at IS NULL")
 
 	return users
 }
 
-func IsValid(user *entity.User) (bool, []error) {
+func IsValid(user *entities.User) (bool, []error) {
 	var count int
 	var errs []error
 	var validEmail = regexp.MustCompile(`\A[^@]+@([^@\.]+\.)+[^@\.]+\z`)
@@ -53,7 +53,7 @@ func IsValid(user *entity.User) (bool, []error) {
 		errs = append(errs, errors.New("email is too long"))
 	} else if !validEmail.MatchString(user.Email) {
 		errs = append(errs, errors.New("email is invalid"))
-	} else if model.Db.Model(&entity.User{}).Where("id <> ? AND email = ? AND deleted_at IS NULL", user.ID, user.Email).Count(&count); count > 0 {
+	} else if model.Db.Model(&entities.User{}).Where("id <> ? AND email = ? AND deleted_at IS NULL", user.ID, user.Email).Count(&count); count > 0 {
 		errs = append(errs, errors.New("email has already been taken"))
 	}
 
@@ -70,7 +70,7 @@ func IsValid(user *entity.User) (bool, []error) {
 	return (len(errs) == 0), errs
 }
 
-func Update(user *entity.User) (bool, []error) {
+func Update(user *entities.User) (bool, []error) {
 	var newValue, currentValue interface{}
 	var valid bool
 	var errs []error
@@ -108,7 +108,7 @@ func Update(user *entity.User) (bool, []error) {
 	return valid, errs
 }
 
-func Create(user *entity.User) (bool, []error) {
+func Create(user *entities.User) (bool, []error) {
 	valid, errs := IsValid(user)
 	if valid && model.Db.NewRecord(user) {
 		user.Password = crypto.SetPassword(user.Password)
@@ -124,7 +124,7 @@ func Create(user *entity.User) (bool, []error) {
 	return valid, errs
 }
 
-func Save(user *entity.User) (bool, []error) {
+func Save(user *entities.User) (bool, []error) {
 	if model.Db.NewRecord(user) {
 		return Create(user)
 	} else {
@@ -132,7 +132,7 @@ func Save(user *entity.User) (bool, []error) {
 	}
 }
 
-func Destroy(user *entity.User) bool {
+func Destroy(user *entities.User) bool {
 	if model.Db.NewRecord(user) {
 		return false
 	} else {
@@ -141,21 +141,21 @@ func Destroy(user *entity.User) bool {
 	}
 }
 
-func FindByEmail(email string) (entity.User, error) {
-	var user entity.User
+func FindByEmail(email string) (entities.User, error) {
+	var user entities.User
 	var err error
 
 	model.Db.Where("email = ? AND deleted_at IS NULL", email).First(&user)
 	if model.Db.NewRecord(user) {
-		user = entity.User{}
+		user = entities.User{}
 		err = errors.New(NotFound)
 	}
 
 	return user, err
 }
 
-func FindByResetPasswordToken(token string) (entity.User, error) {
-	var user entity.User
+func FindByResetPasswordToken(token string) (entities.User, error) {
+	var user entities.User
 	var err error
 
 	enconded_token := crypto.EncryptText(token, config.SecretKey())
@@ -163,16 +163,16 @@ func FindByResetPasswordToken(token string) (entity.User, error) {
 
 	model.Db.Where("reset_password_token = ? AND reset_password_sent_at >= ? AND deleted_at IS NULL", enconded_token, two_days_ago).First(&user)
 	if model.Db.NewRecord(user) {
-		user = entity.User{}
+		user = entities.User{}
 		err = errors.New(NotFound)
 	}
 
 	return user, err
 }
 
-func Paginate(criteria map[string]string, page interface{}, perPage interface{}) ([]entity.User, int, int, int) {
-	var users []entity.User
-	var user entity.User
+func Paginate(criteria map[string]string, page interface{}, perPage interface{}) ([]entities.User, int, int, int) {
+	var users []entities.User
+	var user entities.User
 
 	search, currentPage, totalPages, totalEntries := pagination.Query(&user, criteria, page, perPage)
 
@@ -181,22 +181,22 @@ func Paginate(criteria map[string]string, page interface{}, perPage interface{})
 	return users, currentPage, totalPages, totalEntries
 }
 
-func Authenticate(email string, password string) (entity.User, error) {
+func Authenticate(email string, password string) (entities.User, error) {
 	user, err := FindByEmail(email)
 
 	if model.Db.NewRecord(user) || !crypto.CheckPassword(password, user.Password) {
-		user = entity.User{}
+		user = entities.User{}
 		err = errors.New("invalid credentials")
 	}
 
 	return user, err
 }
 
-func IsNil(user *entity.User) bool {
+func IsNil(user *entities.User) bool {
 	return model.Db.NewRecord(user)
 }
 
-func Exists(user *entity.User) bool {
+func Exists(user *entities.User) bool {
 	return !IsNil(user)
 }
 
@@ -213,7 +213,7 @@ func IdExists(id interface{}) bool {
 	return (err == nil)
 }
 
-func SetRecovery(user *entity.User) (string, []error) {
+func SetRecovery(user *entities.User) (string, []error) {
 	token := crypto.RandString(20)
 
 	if model.Db.NewRecord(user) {
@@ -233,7 +233,7 @@ func SetRecovery(user *entity.User) (string, []error) {
 	}
 }
 
-func ClearRecovery(user *entity.User) (bool, []error) {
+func ClearRecovery(user *entities.User) (bool, []error) {
 	if model.Db.NewRecord(user) {
 		return false, []error{errors.New(NotFound)}
 	} else {
@@ -245,7 +245,7 @@ func ClearRecovery(user *entity.User) (bool, []error) {
 	}
 }
 
-func FirstName(user *entity.User) string {
+func FirstName(user *entities.User) string {
 	return strings.Split(user.Name, " ")[0]
 }
 
