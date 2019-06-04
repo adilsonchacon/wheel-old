@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"log"
 	"os"
 	"os/exec"
@@ -11,6 +12,42 @@ import (
 	"strings"
 )
 
+type TemplateVars struct {
+	AppDomain string
+	AppName   string
+}
+
+func GenerateHandlers(templatePath string, destinyPath string, templateVars TemplateVars) {
+	var content bytes.Buffer
+
+	fmt.Println("templatePath:", templatePath)
+	fmt.Println("destinyPath:", destinyPath)
+	fmt.Println("templateVars:", templateVars)
+
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tmpl.Execute(&content, &templateVars)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	f, err := os.Create(destinyPath)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(content.String())
+	if err != nil {
+		panic(err)
+	}
+
+	f.Sync()
+}
+
 func main() {
 	var out bytes.Buffer
 	var hasDependence bool
@@ -18,6 +55,10 @@ func main() {
 	command := os.Args[1]
 	fmt.Println("command:", command)
 	appName := os.Args[2]
+	domain := os.Args[3]
+	appDomain := appName + "." + domain
+
+	templateVars := TemplateVars{AppName: appName, AppDomain: appDomain}
 
 	// TODO: if command == new ... else if ... else ...
 
@@ -72,99 +113,109 @@ func main() {
 	}
 
 	rootAppPath := filepath.Join(usr.HomeDir, "go", "src", appName)
-	if err := os.MkdirAll(goPath, 0775); err != nil {
+	if err := os.MkdirAll(rootAppPath, 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "app", "handlers"), 0775); err != nil {
+	// APP Handlers
+	handlersDestinyBasePath := filepath.Join(rootAppPath, "app", "handlers")
+	if err := os.MkdirAll(handlersDestinyBasePath, 0775); err != nil {
+		log.Fatal(err)
+	}
+	handlersTemplateBasePath := filepath.Join(".", "templates", "baseapp", "app", "handlers")
+	defaultHandlers := []string{"myself", "session", "user"}
+	for _, handler := range defaultHandlers {
+		GenerateHandlers(filepath.Join(handlersTemplateBasePath, handler+"_handler.template"), filepath.Join(handlersDestinyBasePath, handler+"_handler.go"), templateVars)
+	}
+
+	// APP myself
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "app", "myself"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "app", "myself"), 0775); err != nil {
+	// APP session
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "app", "session"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "app", "session"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "app", "session", "mailer"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "app", "session", "mailer"), 0775); err != nil {
+	// APP user
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "app", "user"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "app", "user"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "app", "handler"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "handler"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "app", "model"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "model"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "app", "model", "pagination"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "model", "pagination"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "app", "model", "searchengine"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "model", "searchengine"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "app", "view"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "app", "view"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "conversor"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "conversor"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "crypto"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "crypto"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "locale"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "locale"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "log"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "log"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "mailer"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "commons", "mailer"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "config"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "config"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "config", "keys"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "config", "keys"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "config", "locales"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "config", "locales"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "db"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "db"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "db", "entities"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "db", "entities"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "db", "schema"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "db", "schema"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "log"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(goPath, "log"), 0775); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := os.MkdirAll(filepath.Join(goPath, "routes"), 0775); err != nil {
+	if err := os.MkdirAll(filepath.Join(rootAppPath, "routes"), 0775); err != nil {
 		log.Fatal(err)
 	}
 
