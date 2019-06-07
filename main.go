@@ -23,6 +23,8 @@ func GenerateHandlers(templatePath string, destinyPath string, templateVars Temp
 
 	fmt.Println("created:", destinyPath)
 
+	// templte.Parse works for strings
+	// tmpl, err := template.Parse(templatePath)
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		log.Fatal(err)
