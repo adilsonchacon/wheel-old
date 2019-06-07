@@ -16,9 +16,8 @@
 /*/*/*/*/*/.AppleDouble
 
 # configs
-/config/keys/app.key.rsa
-/config/keys/app.key.rsa.pub
-/config/app.yml
-/config/database.yml
-/config/email.yml
-/t
+/templates/config/keys/app.key.rsa
+/templates/config/keys/app.key.rsa.pub
+/templates/config/app.yml
+/templates/config/database.yml
+/templates/config/email.yml
