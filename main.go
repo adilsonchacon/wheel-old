@@ -10,6 +10,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"wheel.smart26.com/copy"
 )
 
 type TemplateVars struct {
@@ -20,9 +21,7 @@ type TemplateVars struct {
 func GenerateHandlers(templatePath string, destinyPath string, templateVars TemplateVars) {
 	var content bytes.Buffer
 
-	fmt.Println("templatePath:", templatePath)
-	fmt.Println("destinyPath:", destinyPath)
-	fmt.Println("templateVars:", templateVars)
+	fmt.Println("created:", destinyPath)
 
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
@@ -112,41 +111,71 @@ func main() {
 		log.Fatal(err)
 	}
 
-	rootAppPath := filepath.Join(usr.HomeDir, "go", "src", appName)
+	rootAppPath := filepath.Join(usr.HomeDir, "go", "src", appDomain)
 	if err := os.MkdirAll(rootAppPath, 0775); err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Println("created:", rootAppPath)
 	}
 
 	// APP Handlers
 	handlersDestinyBasePath := filepath.Join(rootAppPath, "app", "handlers")
 	if err := os.MkdirAll(handlersDestinyBasePath, 0775); err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Println("created:", handlersDestinyBasePath)
 	}
+
 	handlersTemplateBasePath := filepath.Join(".", "templates", "baseapp", "app", "handlers")
 	defaultHandlers := []string{"myself", "session", "user"}
 	for _, handler := range defaultHandlers {
 		GenerateHandlers(filepath.Join(handlersTemplateBasePath, handler+"_handler.template"), filepath.Join(handlersDestinyBasePath, handler+"_handler.go"), templateVars)
 	}
 
+	// APP packages path
+	appPackagesPath := filepath.Join(".", "templates", "baseapp", "app")
+
 	// APP myself
-	if err := os.MkdirAll(filepath.Join(rootAppPath, "app", "myself"), 0775); err != nil {
+	myselfPackagePath := filepath.Join(rootAppPath, "app", "myself")
+	if err := os.MkdirAll(myselfPackagePath, 0775); err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Println("created:", myselfPackagePath)
 	}
+	GenerateHandlers(filepath.Join(appPackagesPath, "myself", "myself_view.template"), filepath.Join(myselfPackagePath, "myself_view.go"), templateVars)
 
 	// APP session
-	if err := os.MkdirAll(filepath.Join(rootAppPath, "app", "session"), 0775); err != nil {
+	sessionPackagePath := filepath.Join(rootAppPath, "app", "session")
+	if err := os.MkdirAll(sessionPackagePath, 0775); err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Println("created:", sessionPackagePath)
 	}
+	GenerateHandlers(filepath.Join(appPackagesPath, "session", "session_view.template"), filepath.Join(sessionPackagePath, "session_view.go"), templateVars)
+	GenerateHandlers(filepath.Join(appPackagesPath, "session", "session_model.template"), filepath.Join(sessionPackagePath, "session_model.go"), templateVars)
 
-	if err := os.MkdirAll(filepath.Join(rootAppPath, "app", "session", "mailer"), 0775); err != nil {
-		log.Fatal(err)
+	// APP session
+	sessionMailerTemplatesPath := filepath.Join(appPackagesPath, "session", "mailer")
+	mailerFiles := []string{"password_recovery.en.html", "password_recovery.pt-BR.html", "sign_up.en.html", "sign_up.pt-BR.html"}
+	for _, mailerFile := range mailerFiles {
+		if err := copy.File(filepath.Join(sessionMailerTemplatesPath, mailerFile), filepath.Join(sessionPackagePath, mailerFile)); err != nil {
+			log.Fatal(err)
+		} else {
+			fmt.Println("created:", filepath.Join(sessionPackagePath, mailerFile))
+		}
 	}
 
 	// APP user
-	if err := os.MkdirAll(filepath.Join(rootAppPath, "app", "user"), 0775); err != nil {
+	userPackagePath := filepath.Join(rootAppPath, "app", "user")
+	if err := os.MkdirAll(userPackagePath, 0775); err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Println("created:", userPackagePath)
 	}
+	GenerateHandlers(filepath.Join(appPackagesPath, "user", "user_view.template"), filepath.Join(userPackagePath, "user_view.go"), templateVars)
+	GenerateHandlers(filepath.Join(appPackagesPath, "user", "user_model.template"), filepath.Join(userPackagePath, "user_model.go"), templateVars)
 
+	// COMMONS
 	if err := os.MkdirAll(filepath.Join(rootAppPath, "commons", "app", "handler"), 0775); err != nil {
 		log.Fatal(err)
 	}
