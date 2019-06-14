@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"{{ .AppDomain }}/app/user"
-	"{{ .AppDomain }}/commons/app/apphandler"
+	"{{ .AppDomain }}/commons/app/handler"
 	"{{ .AppDomain }}/commons/app/model"
 	"{{ .AppDomain }}/commons/app/view"
 	"{{ .AppDomain }}/commons/log"

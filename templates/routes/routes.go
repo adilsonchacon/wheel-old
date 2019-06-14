@@ -1,6 +1,6 @@
 package routes
 
-var Path = []string{"db", "routes", "routes.go"}
+var Path = []string{"routes", "routes.go"}
 
 var Content = `package routes
 

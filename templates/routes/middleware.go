@@ -1,6 +1,6 @@
 package routes
 
-var MiddlewarePath = []string{"db", "routes", "middleware.go"}
+var MiddlewarePath = []string{"routes", "middleware.go"}
 
 var MiddlewareContent = `package routes
 
@@ -96,7 +96,7 @@ func checkToken(token string) (uint, error) {
 }
 
 func filterParamsValues(queries map[string][]string) map[string][]string {
-	var filter = regexp.MustCompile(`(?i)(password)|(token)`)
+	var filter = regexp.MustCompile(` + "`" + `(?i)(password)|(token)` + "`" + `)
 	queries_filtered := make(map[string][]string)
 
 	for key := range queries {

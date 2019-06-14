@@ -1,4 +1,4 @@
-package log
+package logtemplate
 
 var Path = []string{"commons", "log", "log.go"}
 

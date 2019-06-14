@@ -1,6 +1,6 @@
 package config
 
-var Path = []string{"commons", "config", "config.go"}
+var Path = []string{"config", "config.go"}
 
 var Content = `package config
 
@@ -12,6 +12,7 @@ import (
 
 type AppConfig struct {
 	App_name                          string
+	App_domain                        string
 	Secret_key                        string
 	Reset_password_expiration_seconds int
 	Reset_password_url                string
@@ -23,6 +24,10 @@ var appConfig AppConfig
 
 func AppName() string {
 	return appConfig.App_name
+}
+
+func AppDomain() string {
+	return appConfig.App_domain
 }
 
 func SecretKey() string {

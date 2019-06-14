@@ -1,4 +1,4 @@
-package user
+package usertemplate
 
 var ViewPath = []string{"app", "user", "user_view.go"}
 

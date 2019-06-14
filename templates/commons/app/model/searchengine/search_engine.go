@@ -44,7 +44,7 @@ func Query(table interface{}, criteria map[string]string, logic string) (string,
 func handleCriterion(table interface{}, key string, value string) (string, interface{}, error) {
 	var column, columnType, query string
 	var interfaceValue interface{}
-	var regexpInclusionQuery = regexp.MustCompile(` + "`" + `IN\s\(\?\)` + "`" + `\?` + "`" + `)
+	var regexpInclusionQuery = regexp.MustCompile(` + "`" + `IN\s\(\?\)` + "`" + `)
 	var regexpIsNullQuery = regexp.MustCompile(` + "`" + `IS\s(NOT\s){0,1}NULL` + "`" + `)
 	var err error
 

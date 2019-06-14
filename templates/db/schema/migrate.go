@@ -14,9 +14,9 @@ import (
 func Migrate() {
 	model.Db.AutoMigrate(&entities.User{})
 
-	_, err := user.FindByEmail("{{ .UserEmail }}")
+	_, err := user.FindByEmail("user@example.com")
 	if err != nil {
- 		model.Db.Create(&entities.User{Name: "{{ .UserName }}", Email: "{{ .UserEmail }}", Password: crypto.SetPassword("{{ .UserPassword }}"), Locale: "en", Admin: true})
+ 		model.Db.Create(&entities.User{Name: "User Name", Email: "user@example.com", Password: crypto.SetPassword("!Secret.123!"), Locale: "en", Admin: true})
 	}
 
 	model.Db.AutoMigrate(&entities.Session{})

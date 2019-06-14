@@ -1,4 +1,4 @@
-package user
+package usertemplate
 
 var ModelPath = []string{"app", "user", "user_model.go"}
 

@@ -1,6 +1,6 @@
 package routes
 
-var AuthorizePath = []string{"db", "routes", "authorize.go"}
+var AuthorizePath = []string{"routes", "authorize.go"}
 
 var AuthorizeContent = `package routes
 

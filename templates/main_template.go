@@ -1,8 +1,8 @@
-package tmpmain
+package templates
 
-var Path = []string{"main.go"}
+var MainPath = []string{"main.go"}
 
-var Content = `package main
+var MainContent = `package main
 
 import (
 	"flag"
