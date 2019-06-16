@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+package sessionmailer
+
+var PasswordRecoveryEnPath = []string{"app", "session", "mailer", "password_recovery.en.html"}
+
+var PasswordRecoveryEnContent = `<!DOCTYPE html>
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -13,4 +17,4 @@
 		<p>If you didn't request this, please ignore this email.</p>
 		<p>Your password won't change until you access the link above and create a new one.</p>
 	</body>
-</html>
+</html>`

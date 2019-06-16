@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+package sessionmailer
+
+var SignUpPtBrPath = []string{"app", "session", "mailer", "sign_up.pt-BR.html"}
+
+var SignUpPtBrContent = `<!DOCTYPE html>
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -14,4 +18,4 @@
 
 		<p>Nome, Cargo<br>email@example.com</p>
 	</body>
-</html>
+</html>`
