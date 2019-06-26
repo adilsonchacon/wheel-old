@@ -6,10 +6,10 @@ import (
 	"time"
 )
 
-type {{ .EntityNames.Name }} struct {
+type {{ .EntityName.CamelCase }} struct {
 	ID uint ` + "`" + `gorm:"primary_key"` + "`" + `
   {{- range .EntityColumns }}
-  {{ .Name }} {{ .Type }} {{ .Extras }}
+    {{ .Name }} {{ .Type }} {{ .Extras }}
   {{- end }}
 	CreatedAt time.Time
 	UpdatedAt time.Time

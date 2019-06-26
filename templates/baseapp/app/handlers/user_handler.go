@@ -106,7 +106,7 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 func userSetParams(userSet *entities.User, r *http.Request) {
 	var allowedParams = []string{"name", "email", "password", "admin", "locale"}
 
-	r.ParseForm()
+	r.ParseMultipartForm()
 
 	for key := range r.Form {
 		for _, allowedParam := range allowedParams {

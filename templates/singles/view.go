@@ -1,6 +1,8 @@
 package singles
 
-var ViewContent = `import (
+var ViewContent = `package {{ .EntityName.LowerCase }}
+
+import (
 	"time"
 	"{{ .AppDomain }}/commons/app/view"
 	"{{ .AppDomain }}/db/entities"
@@ -8,30 +10,34 @@ var ViewContent = `import (
 
 type PaginationJson struct {
 	Pagination view.MainPagination ` + "`" + `json:"pagination"` + "`" + `
-	{{ .EntityNames.Plural }} []Json ` + "`" + `json:"{{ .EntityNames.SnakeCase }}"` + "`" + `
+	{{ .EntityName.CamelCasePlural }} []Json ` + "`" + `json:"{{ .EntityName.SnakeCase }}"` + "`" + `
 }
 
 type SuccessfullySavedJson struct {
 	SystemMessage view.SystemMessage ` + "`" + `json:"system_message"` + "`" + `
-	{{ .EntityNames.Name }} Json ` + "`" + `json:"{{ .EntityNames.SnakeCase }}"` + "`" + `
+	{{ .EntityName.CamelCase }} Json ` + "`" + `json:"{{ .EntityName.SnakeCase }}"` + "`" + `
 }
 
 type Json struct {
 	ID uint ` + "`" + `json:"id"` + "`" + `
   {{- range .EntityColumns }}
+  {{- if not .IsForeignKey }}
   {{ .Name }} {{ .Type }} ` + "`" + `json:"{{ .NameSnakeCase }}"` + "`" + `
+  {{- end }}  
   {{- end }}
 	CreatedAt time.Time ` + "`" + `json:"created_at"` + "`" + `
 	UpdatedAt time.Time ` + "`" + `json:"updated_at"` + "`" + `
 }
 
-func SetJson({{ .EntityNames.LowerCamelCase }} entities.{{ .EntityNames.Name }}) Json {
+func SetJson({{ .EntityName.LowerCamelCase }} entities.{{ .EntityName.CamelCase }}) Json {
 	return Json{
-		ID: {{ .EntityNames.LowerCamelCase }}.ID,
+		ID: {{ .EntityName.LowerCamelCase }}.ID,
     {{- range .EntityColumns }}
-    {{ .Name }}: {{ $.EntityNames.LowerCamelCase }}.{{ .Name }},
+    {{- if not .IsForeignKey }}
+    {{ .Name }}: {{ $.EntityName.LowerCamelCase }}.{{ .Name }},
     {{- end }}
-		CreatedAt: {{ .EntityNames.LowerCamelCase }}.CreatedAt,
-		UpdatedAt: {{ .EntityNames.LowerCamelCase }}.UpdatedAt,
+    {{- end }}
+		CreatedAt: {{ .EntityName.LowerCamelCase }}.CreatedAt,
+		UpdatedAt: {{ .EntityName.LowerCamelCase }}.UpdatedAt,
 	}
 }`

@@ -1,15 +1,8 @@
 package newapp
 
 import (
-	"bytes"
-	"fmt"
-	"log"
-	"math/rand"
-	"os"
-	"os/user"
 	"path/filepath"
-	"text/template"
-	"time"
+	"wheel.smart26.com/generator/common"
 	"wheel.smart26.com/templates/baseapp"
 	"wheel.smart26.com/templates/baseapp/app/handlers"
 	"wheel.smart26.com/templates/baseapp/app/myself"
@@ -34,204 +27,89 @@ import (
 	"wheel.smart26.com/templates/baseapp/routes"
 )
 
-type TemplateVars struct {
-	AppDomain string
-	AppName   string
-	SecretKey string
-}
-
-var templateVars TemplateVars
+var templateVar common.TemplateVar
 var rootAppPath string
 var appTemplatesPath string
 
-func saveTextFile(content string, filePath string) {
-	f, err := os.Create(filePath)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
-	_, err = f.WriteString(content)
-	if err != nil {
-		panic(err)
-	}
-
-	f.Sync()
-
-}
-
-func GenerateFromTemplateFile(templatePath string, destinyPath string) {
-	var content bytes.Buffer
-
-	fmt.Println("created:", destinyPath)
-
-	tmpl, err := template.ParseFiles(templatePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = tmpl.Execute(&content, &templateVars)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	saveTextFile(content.String(), destinyPath)
-}
-
-func GenerateFromTemplateString(content string, destinyPath string) {
-	var buffContent bytes.Buffer
-
-	fmt.Println("created:", destinyPath)
-
-	tmpl, err := template.New("T").Parse(content)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = tmpl.Execute(&buffContent, templateVars)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	saveTextFile(buffContent.String(), destinyPath)
-}
-
-func HandlePackagesPathInfo(path []string) (string, string) {
-	var basePath, fileName string
-
-	for index, value := range path {
-		if index+1 != len(path) {
-			basePath = filepath.Join(basePath, value)
-		} else {
-			fileName = value
-		}
-	}
-
-	return basePath, fileName
-}
-
-func GeneratePathAndFileFromPackage(path []string, content string, skipTemplate bool) {
-	basePath, fileName := HandlePackagesPathInfo(path)
-
-	if err := os.MkdirAll(filepath.Join(rootAppPath, basePath), 0775); err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("created:", basePath)
-	}
-
-	if skipTemplate {
-		saveTextFile(content, filepath.Join(rootAppPath, basePath, fileName))
-	} else {
-		GenerateFromTemplateString(content, filepath.Join(rootAppPath, basePath, fileName))
-	}
-}
-
-func SecureRandom(size int) string {
-	var letters = []rune("0123456789abcdefABCDEF")
-
-	rand.Seed(time.Now().UnixNano())
-
-	b := make([]rune, size)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-
-	return string(b)
-}
-
-func BuildRootAppPath(appDomain string) string {
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("ignore:", dir)
-
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return filepath.Join(usr.HomeDir, "go", "src", appDomain)
-}
-
 func Generate(options map[string]string) {
 	// Main vars
-	templateVars = TemplateVars{AppName: options["app_name"], AppDomain: options["app_domain"], SecretKey: SecureRandom(64)}
-	rootAppPath = BuildRootAppPath(options["app_domain"])
+	templateVar = common.TemplateVar{
+		AppName:   options["app_name"],
+		AppDomain: options["app_domain"],
+		SecretKey: common.SecureRandom(128),
+	}
+	rootAppPath = common.BuildRootAppPath(options["app_domain"])
 	appTemplatesPath = filepath.Join("templates", "baseapp")
 
-	if err := os.MkdirAll(rootAppPath, 0775); err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("created:", rootAppPath)
-	}
+	// APP Root path
+	common.CreateRootAppPath(rootAppPath)
 
 	// APP Handlers
-	GeneratePathAndFileFromPackage(handlers.MyselfPath, handlers.MyselfContent, false)
-	GeneratePathAndFileFromPackage(handlers.SessionPath, handlers.SessionContent, false)
-	GeneratePathAndFileFromPackage(handlers.UserPath, handlers.UserContent, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, handlers.MyselfPath, handlers.MyselfContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, handlers.SessionPath, handlers.SessionContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, handlers.UserPath, handlers.UserContent, templateVar, false)
 
 	// APP myself
-	GeneratePathAndFileFromPackage(myself.ViewPath, myself.ViewContent, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, myself.ViewPath, myself.ViewContent, templateVar, false)
 
 	// APP session
-	GeneratePathAndFileFromPackage(session.ModelPath, session.ModelContent, false)
-	GeneratePathAndFileFromPackage(session.ViewPath, session.ViewContent, false)
-	GeneratePathAndFileFromPackage(sessionmailer.PasswordRecoveryEnPath, sessionmailer.PasswordRecoveryEnContent, true)
-	GeneratePathAndFileFromPackage(sessionmailer.PasswordRecoveryPtBrPath, sessionmailer.PasswordRecoveryPtBrContent, true)
-	GeneratePathAndFileFromPackage(sessionmailer.SignUpEnPath, sessionmailer.SignUpEnContent, true)
-	GeneratePathAndFileFromPackage(sessionmailer.SignUpPtBrPath, sessionmailer.SignUpPtBrContent, true)
+	common.GeneratePathAndFileFromPackage(rootAppPath, session.ModelPath, session.ModelContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, session.ViewPath, session.ViewContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, sessionmailer.PasswordRecoveryEnPath, sessionmailer.PasswordRecoveryEnContent, templateVar, true)
+	common.GeneratePathAndFileFromPackage(rootAppPath, sessionmailer.PasswordRecoveryPtBrPath, sessionmailer.PasswordRecoveryPtBrContent, templateVar, true)
+	common.GeneratePathAndFileFromPackage(rootAppPath, sessionmailer.SignUpEnPath, sessionmailer.SignUpEnContent, templateVar, true)
+	common.GeneratePathAndFileFromPackage(rootAppPath, sessionmailer.SignUpPtBrPath, sessionmailer.SignUpPtBrContent, templateVar, true)
 
 	// APP user
-	GeneratePathAndFileFromPackage(usertemplate.ModelPath, usertemplate.ModelContent, false)
-	GeneratePathAndFileFromPackage(usertemplate.ViewPath, usertemplate.ViewContent, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, usertemplate.ModelPath, usertemplate.ModelContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, usertemplate.ViewPath, usertemplate.ViewContent, templateVar, false)
 
 	// COMMONS APPs
-	GeneratePathAndFileFromPackage(handler.Path, handler.Content, false)
-	GeneratePathAndFileFromPackage(model.Path, model.Content, false)
-	GeneratePathAndFileFromPackage(pagination.Path, pagination.Content, false)
-	GeneratePathAndFileFromPackage(searchengine.Path, searchengine.Content, false)
-	GeneratePathAndFileFromPackage(view.Path, view.Content, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, handler.Path, handler.Content, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, model.Path, model.Content, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, pagination.Path, pagination.Content, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, searchengine.Path, searchengine.Content, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, view.Path, view.Content, templateVar, false)
 
 	// COMMONS conversor
-	GeneratePathAndFileFromPackage(conversor.Path, conversor.Content, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, conversor.Path, conversor.Content, templateVar, false)
 
 	// COMMONS crypto
-	GeneratePathAndFileFromPackage(crypto.Path, crypto.Content, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, crypto.Path, crypto.Content, templateVar, false)
 
 	// COMMONS locale
-	GeneratePathAndFileFromPackage(locale.Path, locale.Content, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, locale.Path, locale.Content, templateVar, false)
 
 	// COMMONS log
-	GeneratePathAndFileFromPackage(logtemplate.Path, logtemplate.Content, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, logtemplate.Path, logtemplate.Content, templateVar, false)
 
 	// COMMONS mailer
-	GeneratePathAndFileFromPackage(mailer.Path, mailer.Content, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, mailer.Path, mailer.Content, templateVar, false)
 
 	// config
-	GeneratePathAndFileFromPackage(config.Path, config.Content, false)
-	GeneratePathAndFileFromPackage(config.AppPath, config.AppContent, false)
-	GeneratePathAndFileFromPackage(config.DatabasePath, config.DatabaseContent, false)
-	GeneratePathAndFileFromPackage(config.EmailPath, config.EmailContent, true)
+	common.GeneratePathAndFileFromPackage(rootAppPath, config.Path, config.Content, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, config.AppPath, config.AppContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, config.DatabasePath, config.DatabaseContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, config.EmailPath, config.EmailContent, templateVar, true)
 
 	// config keys
-	GeneratePathAndFileFromPackage(configkeys.RsaExamplePath, configkeys.RsaExampleContent, true)
-	GeneratePathAndFileFromPackage(configkeys.RsaPubExamplePath, configkeys.RsaPubExampleContent, true)
+	common.GeneratePathAndFileFromPackage(rootAppPath, configkeys.RsaExamplePath, configkeys.RsaExampleContent, templateVar, true)
+	common.GeneratePathAndFileFromPackage(rootAppPath, configkeys.RsaPubExamplePath, configkeys.RsaPubExampleContent, templateVar, true)
 
 	// config locales
-	GeneratePathAndFileFromPackage(configlocales.EnPath, configlocales.EnContent, true)
-	GeneratePathAndFileFromPackage(configlocales.PtBrPath, configlocales.PtBrContent, true)
+	common.GeneratePathAndFileFromPackage(rootAppPath, configlocales.EnPath, configlocales.EnContent, templateVar, true)
+	common.GeneratePathAndFileFromPackage(rootAppPath, configlocales.PtBrPath, configlocales.PtBrContent, templateVar, true)
 
 	// db
-	GeneratePathAndFileFromPackage(entities.SessionPath, entities.SessionContent, false)
-	GeneratePathAndFileFromPackage(entities.UserPath, entities.UserContent, false)
-	GeneratePathAndFileFromPackage(schema.Path, schema.Content, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, entities.SessionPath, entities.SessionContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, entities.UserPath, entities.UserContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, schema.Path, schema.Content, templateVar, false)
 
 	// routes
-	GeneratePathAndFileFromPackage(routes.AuthorizePath, routes.AuthorizeContent, false)
-	GeneratePathAndFileFromPackage(routes.MiddlewarePath, routes.MiddlewareContent, false)
-	GeneratePathAndFileFromPackage(routes.Path, routes.Content, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, routes.AuthorizePath, routes.AuthorizeContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, routes.MiddlewarePath, routes.MiddlewareContent, templateVar, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, routes.Path, routes.Content, templateVar, false)
 
 	// main
-	GeneratePathAndFileFromPackage(templates.MainPath, templates.MainContent, false)
+	common.GeneratePathAndFileFromPackage(rootAppPath, templates.MainPath, templates.MainContent, templateVar, false)
 }

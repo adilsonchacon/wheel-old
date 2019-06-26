@@ -84,7 +84,7 @@ func main() {
 
 		generator.NewApp(options)
 	} else {
-		generator.Single(os.Args[2], []string{"title:string:index", "description:text"})
+		generator.Single(os.Args[2], []string{"title:string:index", "description:text", "project:reference"})
 	}
 
 }
