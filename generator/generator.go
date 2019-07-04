@@ -2,13 +2,13 @@ package generator
 
 import (
 	"wheel.smart26.com/generator/newapp"
-	"wheel.smart26.com/generator/single"
+	"wheel.smart26.com/generator/newcrud"
 )
 
 func NewApp(options map[string]string) {
 	newapp.Generate(options)
 }
 
-func Single(entityName string, options []string) {
-	single.Generate(entityName, options)
+func NewCrud(entityName string, columns []string, options map[string]bool) {
+	newcrud.Generate(entityName, columns, options)
 }

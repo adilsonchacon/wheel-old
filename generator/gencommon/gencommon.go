@@ -1,4 +1,4 @@
-package common
+package gencommon
 
 import (
 	"bytes"
@@ -109,7 +109,7 @@ func GenerateFromTemplateFile(templatePath string, destinyPath string, templateV
 	SaveTextFile(content.String(), destinyPath)
 }
 
-func HandlePackagesPathInfo(path []string) (string, string) {
+func HandlePathInfo(path []string) (string, string) {
 	var basePath, fileName string
 
 	for index, value := range path {
@@ -123,15 +123,12 @@ func HandlePackagesPathInfo(path []string) (string, string) {
 	return basePath, fileName
 }
 
-func GeneratePathAndFileFromPackage(rootAppPath string, path []string, content string, templateVar TemplateVar, skipTemplate bool) {
-	basePath, fileName := HandlePackagesPathInfo(path)
+func GenerateFromTemplateFullPath(rootAppPath string, path []string, content string, templateVar TemplateVar, skipTemplate bool) {
+	basePath, fileName := HandlePathInfo(path)
 
 	if err := os.MkdirAll(filepath.Join(rootAppPath, basePath), 0775); err != nil {
 		log.Fatal(err)
 	}
-	//   else {
-	//   fmt.Println("created:", basePath)
-	// }
 
 	if skipTemplate {
 		SaveTextFile(content, filepath.Join(rootAppPath, basePath, fileName))

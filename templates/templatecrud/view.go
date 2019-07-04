@@ -1,4 +1,4 @@
-package singles
+package templatecrud
 
 var ViewContent = `package {{ .EntityName.LowerCase }}
 

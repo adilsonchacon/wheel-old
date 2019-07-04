@@ -1,4 +1,4 @@
-package singles
+package templatecrud
 
 var EntityContent = `package entities
 
@@ -9,7 +9,7 @@ import (
 type {{ .EntityName.CamelCase }} struct {
 	ID uint ` + "`" + `gorm:"primary_key"` + "`" + `
   {{- range .EntityColumns }}
-    {{ .Name }} {{ .Type }} {{ .Extras }}
+  {{ .Name }} {{ .Type }} {{ .Extras }}
   {{- end }}
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -2,13 +2,15 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
 	"wheel.smart26.com/generator"
-	// "wheel.smart26.com/strcase"
+	"wheel.smart26.com/help"
+	"wheel.smart26.com/version"
 )
 
 func IsGoInstalled() bool {
@@ -62,9 +64,99 @@ func CheckDependences() {
 	}
 }
 
-func main() {
-	var options = make(map[string]string)
+func handleNewApp(args []string) {
+	var options map[string]string
 
+	options["app_name"] = os.Args[2]
+	options["app_domain"] = os.Args[2] + "." + os.Args[3]
+
+	generator.NewApp(options)
+}
+
+func buildGenerateOptions(args []string) (map[string]bool, error) {
+	var options = make(map[string]bool)
+	var subject string
+	var err error
+
+	subject = args[2]
+
+	switch subject {
+	case "scaffold":
+		options["model"] = true
+		options["entity"] = true
+		options["view"] = true
+		options["handler"] = true
+		if len(args) < 4 {
+			err = errors.New("invalid scaffold name")
+		}
+	case "model":
+		options["model"] = true
+		options["entity"] = true
+		options["view"] = false
+		options["handler"] = false
+		if len(args) < 4 {
+			err = errors.New("invalid model name")
+		}
+	case "handler":
+		options["model"] = false
+		options["entity"] = false
+		options["view"] = false
+		options["handler"] = true
+	case "view":
+		options["model"] = false
+		options["entity"] = false
+		options["view"] = true
+		options["handler"] = false
+	case "entity":
+		options["model"] = false
+		options["entity"] = true
+		options["view"] = false
+		options["handler"] = false
+		if len(args) < 4 {
+			err = errors.New("invalid entity name")
+		}
+	default:
+		err = errors.New("invalid generate subject")
+	}
+
+	return options, err
+}
+
+func handleGenerateNewCrud(args []string, options map[string]bool) {
+	var columns []string
+
+	for index, value := range args {
+		if index <= 3 {
+			continue
+		} else {
+			columns = append(columns, value)
+		}
+	}
+
+	generator.NewCrud(args[3], columns, options)
+}
+
+func handleGenerate(args []string) {
+	var options map[string]bool
+	var err error
+
+	options, err = buildGenerateOptions(args)
+	if err == nil {
+		handleGenerateNewCrud(args, options)
+	} else {
+		fmt.Println(err)
+	}
+}
+
+func handleHelp() {
+	fmt.Println(help.Content)
+}
+
+func handleVersion() {
+	fmt.Println(version.Content)
+}
+
+func main() {
 	command := os.Args[1]
 	fmt.Println("command:", command)
 
@@ -75,35 +167,25 @@ func main() {
 		CheckDependences()
 	}
 
-	// TODO: if command == new ... else if ... else ...
-	// TODO: check options
-
-	if command == "new" {
-		options["app_name"] = os.Args[2]
-		options["app_domain"] = os.Args[2] + "." + os.Args[3]
-
-		generator.NewApp(options)
-	} else {
-		generator.Single(os.Args[2], []string{"title:string:index", "description:text", "project:reference"})
+	if command == "new" || command == "n" {
+		handleNewApp(os.Args)
+	} else if command == "generate" || command == "g" {
+		handleGenerate(os.Args)
+	} else if command == "--help" || command == "-h" {
+		handleHelp()
+	} else if command == "--version" || command == "-v" {
+		handleVersion()
 	}
 
 }
 
 /*
 
-wheel new APP_NAME
+	router.HandleFunc("/users", handlers.UserList).Methods("GET")
+	router.HandleFunc("/users/{id}", handlers.UserShow).Methods("GET")
+	router.HandleFunc("/users", handlers.UserCreate).Methods("POST")
+	router.HandleFunc("/users/{id}", handlers.UserUpdate).Methods("PUT")
+	router.HandleFunc("/users/{id}", handlers.UserDestroy).Methods("DELETE")
 
-- check whether go is installed, if don't alert and stop running
-- check whether wheel's go packages are installed, for each if don't install it
-- check "HOME_DIR -> go" folder exists, otherwise create it
-
-*/
-
-/*
-  -h, [--help]        # Show this help message and quit
-  -v, [--version]     # Show Wheel version number and quit
-*/
-
-/*
-  -G, [--skip-git]    # Skip .gitignore file
+  model.Db.AutoMigrate(&entities.User{})
 */
