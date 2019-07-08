@@ -86,6 +86,8 @@ func buildGenerateOptions(args []string) (map[string]bool, error) {
 		options["entity"] = true
 		options["view"] = true
 		options["handler"] = true
+		options["routes"] = true
+		options["migrate"] = true
 		if len(args) < 4 {
 			err = errors.New("invalid scaffold name")
 		}
@@ -176,16 +178,4 @@ func main() {
 	} else if command == "--version" || command == "-v" {
 		handleVersion()
 	}
-
 }
-
-/*
-
-	router.HandleFunc("/users", handlers.UserList).Methods("GET")
-	router.HandleFunc("/users/{id}", handlers.UserShow).Methods("GET")
-	router.HandleFunc("/users", handlers.UserCreate).Methods("POST")
-	router.HandleFunc("/users/{id}", handlers.UserUpdate).Methods("PUT")
-	router.HandleFunc("/users/{id}", handlers.UserDestroy).Methods("DELETE")
-
-  model.Db.AutoMigrate(&entities.User{})
-*/

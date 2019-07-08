@@ -3,6 +3,7 @@ package gencommon
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -29,6 +30,7 @@ type EntityName struct {
 	LowerCamelCase       string
 	LowerCamelCasePlural string
 	SnakeCase            string
+	SnakeCasePlural      string
 	LowerCase            string
 }
 
@@ -40,8 +42,14 @@ type TemplateVar struct {
 	EntityColumns []EntityColumn
 }
 
-func SaveTextFile(content string, filePath string) {
-	f, err := os.Create(filePath)
+func SaveTextFile(content string, filePath string, fileName string) {
+	if err := os.MkdirAll(filePath, 0775); err != nil {
+		log.Fatal(err)
+	}
+
+	fullPath := filepath.Join(filePath, fileName)
+
+	f, err := os.Create(fullPath)
 	if err != nil {
 		panic(err)
 	}
@@ -52,10 +60,24 @@ func SaveTextFile(content string, filePath string) {
 		panic(err)
 	}
 
+	fmt.Println("created:", fullPath)
+
 	f.Sync()
 }
 
-func GenerateFromTemplateString(content string, destinyPath string, templateVar TemplateVar) {
+func ReadTextFile(filePath string, fileName string) string {
+	file, err := os.Open(filepath.Join(filePath, fileName))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	b, err := ioutil.ReadAll(file)
+
+	return string(b)
+}
+
+func GenerateFromTemplateString(content string, templateVar TemplateVar) string {
 	var buffContent bytes.Buffer
 
 	FuncMap := template.FuncMap{
@@ -76,8 +98,6 @@ func GenerateFromTemplateString(content string, destinyPath string, templateVar 
 		},
 	}
 
-	fmt.Println("created:", destinyPath)
-
 	tmpl, err := template.New("T").Funcs(FuncMap).Parse(content)
 	if err != nil {
 		log.Fatal(err)
@@ -88,13 +108,11 @@ func GenerateFromTemplateString(content string, destinyPath string, templateVar 
 		log.Fatal(err)
 	}
 
-	SaveTextFile(buffContent.String(), destinyPath)
+	return buffContent.String()
 }
 
-func GenerateFromTemplateFile(templatePath string, destinyPath string, templateVar TemplateVar) {
+func GenerateFromTemplateFile(templatePath string, templateVar TemplateVar) string {
 	var content bytes.Buffer
-
-	fmt.Println("created:", destinyPath)
 
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
@@ -106,7 +124,26 @@ func GenerateFromTemplateFile(templatePath string, destinyPath string, templateV
 		log.Fatal(err)
 	}
 
-	SaveTextFile(content.String(), destinyPath)
+	return content.String()
+}
+
+func GeneratePathAndFileFromTemplateString(path []string, content string, templateVar TemplateVar) {
+	fileName, filePath := path[len(path)-1], path[:len(path)-1]
+	content = GenerateFromTemplateString(content, templateVar)
+	SaveTextFile(content, sliceToPath(filePath), fileName)
+}
+
+func CreatePathAndFileFromTemplateString(path []string, content string, templateVar TemplateVar) {
+	fileName, filePath := path[len(path)-1], path[:len(path)-1]
+	SaveTextFile(content, sliceToPath(filePath), fileName)
+}
+
+func GenerateRoutesNewCode(content string, templateVar TemplateVar) string {
+	return GenerateFromTemplateString(content, templateVar)
+}
+
+func GenerateMigrateNewCode(content string, templateVar TemplateVar) string {
+	return GenerateFromTemplateString(content, templateVar)
 }
 
 func HandlePathInfo(path []string) (string, string) {
@@ -123,20 +160,6 @@ func HandlePathInfo(path []string) (string, string) {
 	return basePath, fileName
 }
 
-func GenerateFromTemplateFullPath(rootAppPath string, path []string, content string, templateVar TemplateVar, skipTemplate bool) {
-	basePath, fileName := HandlePathInfo(path)
-
-	if err := os.MkdirAll(filepath.Join(rootAppPath, basePath), 0775); err != nil {
-		log.Fatal(err)
-	}
-
-	if skipTemplate {
-		SaveTextFile(content, filepath.Join(rootAppPath, basePath, fileName))
-	} else {
-		GenerateFromTemplateString(content, filepath.Join(rootAppPath, basePath, fileName), templateVar)
-	}
-}
-
 func SecureRandom(size int) string {
 	var letters = []rune("0123456789abcdefABCDEF")
 
@@ -151,11 +174,10 @@ func SecureRandom(size int) string {
 }
 
 func BuildRootAppPath(appDomain string) string {
-	dir, err := os.Getwd()
+	_, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("ignore:", dir)
 
 	usr, err := user.Current()
 	if err != nil {
@@ -214,6 +236,20 @@ func GetColumnInfo(columnName string, columnType string, extra string) (string, 
 	}
 
 	return columnName, columnType, extra, isReference
+}
+
+func sliceToPath(path []string) string {
+	var filePath string
+
+	for index, element := range path {
+		if index > 0 {
+			filePath = filepath.Join(filePath, element)
+		} else {
+			filePath = element
+		}
+	}
+
+	return filePath
 }
 
 func gormSpecificationForString(extra string) string {
