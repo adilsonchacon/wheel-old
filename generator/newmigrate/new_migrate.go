@@ -1,4 +1,4 @@
-package newcrud
+package newmigrate
 
 import (
 	"errors"
@@ -6,20 +6,20 @@ import (
 )
 
 const (
-	expectingFOfFunc = 0
-	expectingUOfFunc = 1
-	expectingNOfFunc = 2
-	expectingCOfFunc = 3
+	beginning = 0
 
-	expectingMOfMigrate = 4
-	expectingIOfMigrate = 5
-	expectingGOfMigrate = 6
-	expectingROfMigrate = 7
-	expectingAOfMigrate = 8
-	expectingTOfMigrate = 9
-	expectingEOfMigrate = 10
+	funcCharWasFoundF = 1
+	funcCharWasFoundU = 2
+	funcCharWasFoundN = 3
+	funcCharWasFoundC = 4
 
-	funcMigrateWasFound = 11
+	migrateCharWasFoundM = 5
+	migrateCharWasFoundI = 6
+	migrateCharWasFoundG = 7
+	migrateCharWasFoundR = 8
+	migrateCharWasFoundA = 9
+	migrateCharWasFoundT = 10
+	migrateCharWasFoundE = 11
 
 	commentSingleLine = 12
 	commentMultiLine  = 13
@@ -71,55 +71,55 @@ func insideCommentMultiLine() {
 	lastCharWasStar = currentChar == "*"
 }
 
-func AppendNewCodeToMigrate(newLine string, code string) (string, error) {
+func AppendNewCode(newLine string, code string) (string, error) {
 	var err error
 	var i int
 
 	lastCharWasSlash = false
 	lastCharWasSlash = false
-	currentState = expectingFOfFunc
+	currentState = beginning
 	stack = nil
 
 	for i = 0; i < len(code); i++ {
 		currentChar = code[i : i+1]
 		if regexpEmptyChar.MatchString(currentChar) && currentState != commentSingleLine {
 			continue
-		} else if currentChar == "f" && currentState == expectingFOfFunc {
-			currentState = expectingUOfFunc
-		} else if currentChar == "u" && currentState == expectingUOfFunc {
-			currentState = expectingNOfFunc
-		} else if currentChar == "n" && currentState == expectingNOfFunc {
-			currentState = expectingCOfFunc
-		} else if currentChar == "c" && currentState == expectingCOfFunc {
-			currentState = expectingMOfMigrate
-		} else if currentChar == "M" && currentState == expectingMOfMigrate {
-			currentState = expectingIOfMigrate
-		} else if currentChar == "i" && currentState == expectingIOfMigrate {
-			currentState = expectingGOfMigrate
-		} else if currentChar == "g" && currentState == expectingGOfMigrate {
-			currentState = expectingROfMigrate
-		} else if currentChar == "r" && currentState == expectingROfMigrate {
-			currentState = expectingAOfMigrate
-		} else if currentChar == "a" && currentState == expectingAOfMigrate {
-			currentState = expectingTOfMigrate
-		} else if currentChar == "t" && currentState == expectingTOfMigrate {
-			currentState = expectingEOfMigrate
-		} else if currentChar == "e" && currentState == expectingEOfMigrate {
-			currentState = funcMigrateWasFound
+		} else if currentChar == "f" && currentState == beginning {
+			currentState = funcCharWasFoundF
+		} else if currentChar == "u" && currentState == funcCharWasFoundF {
+			currentState = funcCharWasFoundU
+		} else if currentChar == "n" && currentState == funcCharWasFoundU {
+			currentState = funcCharWasFoundN
+		} else if currentChar == "c" && currentState == funcCharWasFoundN {
+			currentState = funcCharWasFoundC
+		} else if currentChar == "M" && currentState == funcCharWasFoundC {
+			currentState = migrateCharWasFoundM
+		} else if currentChar == "i" && currentState == migrateCharWasFoundM {
+			currentState = migrateCharWasFoundI
+		} else if currentChar == "g" && currentState == migrateCharWasFoundI {
+			currentState = migrateCharWasFoundG
+		} else if currentChar == "r" && currentState == migrateCharWasFoundG {
+			currentState = migrateCharWasFoundR
+		} else if currentChar == "a" && currentState == migrateCharWasFoundR {
+			currentState = migrateCharWasFoundA
+		} else if currentChar == "t" && currentState == migrateCharWasFoundA {
+			currentState = migrateCharWasFoundT
+		} else if currentChar == "e" && currentState == migrateCharWasFoundT {
+			currentState = migrateCharWasFoundE
 		} else if currentChar == "/" && lastCharWasSlash && currentState != commentMultiLine {
 			stateBeforeComment = currentState
 			currentState = commentSingleLine
 		} else if currentChar == "*" && lastCharWasSlash && currentState != commentSingleLine {
 			stateBeforeComment = currentState
 			currentState = commentMultiLine
-		} else if currentState == funcMigrateWasFound {
+		} else if currentState == migrateCharWasFoundE {
 			insideFuncMigrate(i)
 		} else if currentState == commentSingleLine {
 			insideCommentSingleLine()
 		} else if currentState == commentMultiLine {
 			insideCommentMultiLine()
 		} else {
-			currentState = expectingFOfFunc
+			currentState = beginning
 		}
 
 		lastCharWasBackSlash = (currentChar == "\\")
@@ -129,7 +129,7 @@ func AppendNewCodeToMigrate(newLine string, code string) (string, error) {
 	if currentState == 11 && len(stack) == 0 {
 		outputStr = code[0:lastCloseBracket-1] + "\n    " + newLine + "\n" + code[lastCloseBracket-1:len(code)]
 	} else {
-		err = errors.New("Could not parse Migrate file. Please, check sintaxe.")
+		err = errors.New("Could not parse Migrate file.")
 	}
 
 	return outputStr, err

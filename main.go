@@ -65,10 +65,16 @@ func CheckDependences() {
 }
 
 func handleNewApp(args []string) {
-	var options map[string]string
+	var options = make(map[string]string)
 
-	options["app_name"] = os.Args[2]
-	options["app_domain"] = os.Args[2] + "." + os.Args[3]
+	fmt.Println(os.Args[2])
+	preOptions := strings.Split(os.Args[2], "/")
+	fmt.Println(preOptions)
+	fmt.Println(len(preOptions) - 1)
+	fmt.Println(preOptions[2])
+
+	options["app_name"] = preOptions[len(preOptions)-1]
+	options["app_repository"] = os.Args[2]
 
 	generator.NewApp(options)
 }
@@ -79,6 +85,13 @@ func buildGenerateOptions(args []string) (map[string]bool, error) {
 	var err error
 
 	subject = args[2]
+
+	options["model"] = false
+	options["entity"] = false
+	options["view"] = false
+	options["handler"] = false
+	options["routes"] = false
+	options["migrate"] = false
 
 	switch subject {
 	case "scaffold":
@@ -94,26 +107,15 @@ func buildGenerateOptions(args []string) (map[string]bool, error) {
 	case "model":
 		options["model"] = true
 		options["entity"] = true
-		options["view"] = false
-		options["handler"] = false
 		if len(args) < 4 {
 			err = errors.New("invalid model name")
 		}
 	case "handler":
-		options["model"] = false
-		options["entity"] = false
-		options["view"] = false
 		options["handler"] = true
 	case "view":
-		options["model"] = false
-		options["entity"] = false
 		options["view"] = true
-		options["handler"] = false
 	case "entity":
-		options["model"] = false
 		options["entity"] = true
-		options["view"] = false
-		options["handler"] = false
 		if len(args) < 4 {
 			err = errors.New("invalid entity name")
 		}

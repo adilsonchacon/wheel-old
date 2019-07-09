@@ -7,12 +7,12 @@ var Content = `package config
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"{{ .AppDomain }}/commons/log"
+	"{{ .AppRepository }}/commons/log"
 )
 
 type AppConfig struct {
 	App_name                          string
-	App_domain                        string
+	App_repository                        string
 	Secret_key                        string
 	Reset_password_expiration_seconds int
 	Reset_password_url                string
@@ -26,8 +26,8 @@ func AppName() string {
 	return appConfig.App_name
 }
 
-func AppDomain() string {
-	return appConfig.App_domain
+func AppRepository() string {
+	return appConfig.App_repository
 }
 
 func SecretKey() string {

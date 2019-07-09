@@ -15,7 +15,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"{{ .AppDomain }}/commons/log"
+	"{{ .AppRepository }}/commons/log"
 )
 
 type Config struct {

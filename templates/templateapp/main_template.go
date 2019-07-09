@@ -7,11 +7,11 @@ var MainContent = `package main
 import (
 	"flag"
 	"net/http"
-	"{{ .AppDomain }}/commons/app/model"
-	"{{ .AppDomain }}/commons/log"
-	"{{ .AppDomain }}/config"
-	"{{ .AppDomain }}/db/schema"
-	"{{ .AppDomain }}/routes"
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/log"
+	"{{ .AppRepository }}/config"
+	"{{ .AppRepository }}/db/schema"
+	"{{ .AppRepository }}/routes"
 )
 
 func main() {

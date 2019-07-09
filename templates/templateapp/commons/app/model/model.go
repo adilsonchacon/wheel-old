@@ -12,8 +12,8 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
-	"{{ .AppDomain }}/commons/conversor"
-	"{{ .AppDomain }}/commons/log"
+	"{{ .AppRepository }}/commons/conversor"
+	"{{ .AppRepository }}/commons/log"
 )
 
 var Db *gorm.DB

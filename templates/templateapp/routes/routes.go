@@ -7,9 +7,9 @@ var Content = `package routes
 import (
 	"github.com/gorilla/mux"
 	"net/http"
-	"{{ .AppDomain }}/app/handlers"
-	"{{ .AppDomain }}/commons/app/handler"
-	"{{ .AppDomain }}/commons/log"
+	"{{ .AppRepository }}/app/handlers"
+	"{{ .AppRepository }}/commons/app/handler"
+	"{{ .AppRepository }}/commons/log"
 )
 
 func Routes(host string, port string) *mux.Router {

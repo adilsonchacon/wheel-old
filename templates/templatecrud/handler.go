@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
-	"{{ .AppDomain }}/app/{{ .EntityName.LowerCase }}"
-	"{{ .AppDomain }}/commons/app/handler"
-	"{{ .AppDomain }}/commons/app/model"
-	"{{ .AppDomain }}/commons/app/view"
-	"{{ .AppDomain }}/commons/log"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/app/{{ .EntityName.LowerCase }}"
+	"{{ .AppRepository }}/commons/app/handler"
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/app/view"
+	"{{ .AppRepository }}/commons/log"
+	"{{ .AppRepository }}/db/entities"
 )
 
 func {{ .EntityName.CamelCase }}Create(w http.ResponseWriter, r *http.Request) {

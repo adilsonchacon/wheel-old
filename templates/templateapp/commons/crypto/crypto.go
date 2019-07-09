@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"math/rand"
 	"time"
-	"{{ .AppDomain }}/commons/log"
+	"{{ .AppRepository }}/commons/log"
 )
 
 func SetPassword(password string) string {

@@ -14,14 +14,14 @@ import (
 	"net"
 	"net/http"
 	"time"
-	"{{ .AppDomain }}/app/session"
-	"{{ .AppDomain }}/app/user"
-	"{{ .AppDomain }}/commons/app/view"
-	"{{ .AppDomain }}/commons/locale"
-	"{{ .AppDomain }}/commons/log"
-	"{{ .AppDomain }}/commons/mailer"
-	"{{ .AppDomain }}/config"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/app/session"
+	"{{ .AppRepository }}/app/user"
+	"{{ .AppRepository }}/commons/app/view"
+	"{{ .AppRepository }}/commons/locale"
+	"{{ .AppRepository }}/commons/log"
+	"{{ .AppRepository }}/commons/mailer"
+	"{{ .AppRepository }}/config"
+	"{{ .AppRepository }}/db/entities"
 )
 
 type SessionClaims struct {
@@ -195,7 +195,7 @@ func sessionBuildClaims(jti string, userSession *entities.User) (jwt.MapClaims, 
 	expiresAt := time.Now().Add(time.Second * time.Duration(config.TokenExpirationSeconds()))
 
 	claims := make(jwt.MapClaims)
-	claims["iss"] = config.AppDomain()
+	claims["iss"] = config.AppRepository()
 	claims["exp"] = expiresAt.Unix()
 	claims["jti"] = jti
 	claims["uid"] = userSession.ID

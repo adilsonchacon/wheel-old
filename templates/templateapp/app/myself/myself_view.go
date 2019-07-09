@@ -6,7 +6,7 @@ var ViewContent = `package myself
 
 import (
 	"time"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/db/entities"
 )
 
 type Json struct {

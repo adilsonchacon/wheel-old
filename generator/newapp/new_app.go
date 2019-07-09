@@ -36,11 +36,11 @@ func prependRootAppPathToPath(path []string) []string {
 func Generate(options map[string]string) {
 	// Main vars
 	templateVar = gencommon.TemplateVar{
-		AppName:   options["app_name"],
-		AppDomain: options["app_domain"],
-		SecretKey: gencommon.SecureRandom(128),
+		AppName:       options["app_name"],
+		AppRepository: options["app_repository"],
+		SecretKey:     gencommon.SecureRandom(128),
 	}
-	rootAppPath = gencommon.BuildRootAppPath(options["app_domain"])
+	rootAppPath = gencommon.BuildRootAppPath(options["app_repository"])
 
 	// APP Root path
 	gencommon.CreateRootAppPath(rootAppPath)

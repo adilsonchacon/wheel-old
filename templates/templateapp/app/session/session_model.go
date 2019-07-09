@@ -7,8 +7,8 @@ var ModelContent = `package session
 import (
 	"errors"
 	"time"
-	"{{ .AppDomain }}/commons/app/model"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/db/entities"
 )
 
 const NotFound = "session was not found"

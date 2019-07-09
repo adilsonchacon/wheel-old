@@ -7,11 +7,11 @@ var ViewContent = `package session
 import (
 	"bytes"
 	"html/template"
-	"{{ .AppDomain }}/app/user"
-	"{{ .AppDomain }}/commons/app/view"
-	"{{ .AppDomain }}/commons/log"
-	"{{ .AppDomain }}/config"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/app/user"
+	"{{ .AppRepository }}/commons/app/view"
+	"{{ .AppRepository }}/commons/log"
+	"{{ .AppRepository }}/config"
+	"{{ .AppRepository }}/db/entities"
 )
 
 type SignInSuccess struct {

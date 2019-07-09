@@ -11,11 +11,11 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"{{ .AppDomain }}/app/handlers"
-	"{{ .AppDomain }}/app/user"
-	"{{ .AppDomain }}/commons/app/view"
-	"{{ .AppDomain }}/commons/log"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/app/handlers"
+	"{{ .AppRepository }}/app/user"
+	"{{ .AppRepository }}/commons/app/view"
+	"{{ .AppRepository }}/commons/log"
+	"{{ .AppRepository }}/db/entities"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {

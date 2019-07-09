@@ -7,7 +7,7 @@ var Content = `package locale
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"{{ .AppDomain }}/commons/log"
+	"{{ .AppRepository }}/commons/log"
 )
 
 type Keys struct {

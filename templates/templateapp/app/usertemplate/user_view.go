@@ -6,8 +6,8 @@ var ViewContent = `package user
 
 import (
 	"time"
-	"{{ .AppDomain }}/commons/app/view"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/commons/app/view"
+	"{{ .AppRepository }}/db/entities"
 )
 
 type PaginationJson struct {

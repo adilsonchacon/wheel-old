@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"{{ .AppDomain }}/app/myself"
-	"{{ .AppDomain }}/app/user"
-	"{{ .AppDomain }}/commons/app/model"
-	"{{ .AppDomain }}/commons/app/view"
-	"{{ .AppDomain }}/commons/log"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/app/myself"
+	"{{ .AppRepository }}/app/user"
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/app/view"
+	"{{ .AppRepository }}/commons/log"
+	"{{ .AppRepository }}/db/entities"
 )
 
 func MyselfUpdate(w http.ResponseWriter, r *http.Request) {

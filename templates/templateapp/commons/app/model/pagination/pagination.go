@@ -8,8 +8,8 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"strconv"
-	"{{ .AppDomain }}/commons/app/model"
-	"{{ .AppDomain }}/commons/app/model/searchengine"
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/app/model/searchengine"
 )
 
 type Counter struct {

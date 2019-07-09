@@ -3,6 +3,7 @@ package gencommon
 import (
 	"bytes"
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -11,6 +12,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -35,7 +37,7 @@ type EntityName struct {
 }
 
 type TemplateVar struct {
-	AppDomain     string
+	AppRepository string
 	AppName       string
 	SecretKey     string
 	EntityName    EntityName
@@ -60,12 +62,12 @@ func SaveTextFile(content string, filePath string, fileName string) {
 		panic(err)
 	}
 
-	fmt.Println("created:", fullPath)
+	fmt.Println("\033[32mcreated:\033[39m ", fullPath)
 
 	f.Sync()
 }
 
-func ReadTextFile(filePath string, fileName string) string {
+func ReadBytesFile(filePath string, fileName string) []byte {
 	file, err := os.Open(filepath.Join(filePath, fileName))
 	if err != nil {
 		log.Fatal(err)
@@ -74,7 +76,26 @@ func ReadTextFile(filePath string, fileName string) string {
 
 	b, err := ioutil.ReadAll(file)
 
-	return string(b)
+	return b
+}
+
+func ReadTextFile(filePath string, fileName string) string {
+	return string(ReadBytesFile(filePath, fileName))
+}
+
+func GetAppConfig() map[string]string {
+	config := make(map[string]string)
+
+	err := yaml.Unmarshal(ReadBytesFile(filepath.Join(".", "config"), "app.yml"), &config)
+	if err != nil {
+		log.Fatal("error: %v\n", err)
+	}
+
+	if config["pool"] == "" {
+		config["pool"] = "5"
+	}
+
+	return config
 }
 
 func GenerateFromTemplateString(content string, templateVar TemplateVar) string {
@@ -173,7 +194,7 @@ func SecureRandom(size int) string {
 	return string(b)
 }
 
-func BuildRootAppPath(appDomain string) string {
+func BuildRootAppPath(appRepository string) string {
 	_, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -184,7 +205,14 @@ func BuildRootAppPath(appDomain string) string {
 		log.Fatal(err)
 	}
 
-	return filepath.Join(usr.HomeDir, "go", "src", appDomain)
+	path := filepath.Join(usr.HomeDir, "go", "src")
+
+	urlPaths := strings.Split(appRepository, "/")
+	for _, element := range urlPaths {
+		path = filepath.Join(path, element)
+	}
+
+	return path
 }
 
 func CreateRootAppPath(rootAppPath string) {

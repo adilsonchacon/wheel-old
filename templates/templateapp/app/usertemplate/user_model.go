@@ -9,11 +9,11 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"{{ .AppDomain }}/commons/app/model"
-	"{{ .AppDomain }}/commons/app/model/pagination"
-	"{{ .AppDomain }}/commons/crypto"
-	"{{ .AppDomain }}/config"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/app/model/pagination"
+	"{{ .AppRepository }}/commons/crypto"
+	"{{ .AppRepository }}/config"
+	"{{ .AppRepository }}/db/entities"
 )
 
 const NotFound = "user was not found"

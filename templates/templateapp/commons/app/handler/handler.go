@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"{{ .AppDomain }}/commons/app/view"
-	"{{ .AppDomain }}/commons/log"
+	"{{ .AppRepository }}/commons/app/view"
+	"{{ .AppRepository }}/commons/log"
 )
 
 func ApiRoot(w http.ResponseWriter, r *http.Request) {

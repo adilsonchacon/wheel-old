@@ -2,11 +2,13 @@ package newcrud
 
 import (
 	"fmt"
+	"github.com/iancoleman/strcase"
+	"github.com/jinzhu/inflection"
 	"path/filepath"
 	"strings"
-	"wheel.smart26.com/commons/inflection"
-	"wheel.smart26.com/commons/strcase"
 	"wheel.smart26.com/generator/gencommon"
+	"wheel.smart26.com/generator/newmigrate"
+	"wheel.smart26.com/generator/newroutes"
 	"wheel.smart26.com/templates/templatecrud"
 )
 
@@ -67,7 +69,7 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 		LowerCase:            strings.ToLower(strcase.ToCamel(entityName)),
 	}
 
-	templateVar = gencommon.TemplateVar{AppDomain: "test", EntityName: tEntityName, EntityColumns: entityColumns}
+	templateVar = gencommon.TemplateVar{AppRepository: gencommon.GetAppConfig()["app_repository"], EntityName: tEntityName, EntityColumns: entityColumns}
 
 	if options["model"] {
 		path = []string{".", "app", tEntityName.SnakeCase + "_model.go"}
@@ -92,38 +94,31 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 	if options["routes"] {
 		newCode = gencommon.GenerateRoutesNewCode(templatecrud.RoutesContent, templateVar)
 		currentFullCode = gencommon.ReadTextFile(filepath.Join(".", "routes"), "routes.go")
-		newFullCode, err = AppendNewCodeToRoutes(newCode, currentFullCode)
+		newFullCode, err = newroutes.AppendNewCode(newCode, currentFullCode)
 		if err == nil {
 			gencommon.SaveTextFile(newFullCode, filepath.Join(".", "routes"), "routes.go")
 		} else {
-			fmt.Println("--------------------------------------")
-			fmt.Println("")
-			fmt.Printf("\033[93mwarn:\033[39m ")
-			fmt.Println(err)
-			fmt.Println("Edit file \"routes/rotes.go\" and add this new line bellow at \"func Routes()\"")
-			fmt.Println("")
+			fmt.Printf("\n\033[93mwarn:\033[39m : %s", err)
+			fmt.Println("\n")
+			fmt.Println("Edit file \"routes/routes.go\" and append this new code bellow to \"func Routes()\"")
 			fmt.Println(newCode)
 			fmt.Println("")
-			fmt.Println("--------------------------------------\n")
 		}
 	}
 
 	if options["migrate"] {
 		newCode = gencommon.GenerateMigrateNewCode(templatecrud.MigrateContent, templateVar)
 		currentFullCode = gencommon.ReadTextFile(filepath.Join(".", "db", "schema"), "migrate.go")
-		newFullCode, err = AppendNewCodeToMigrate(newCode, currentFullCode)
+		newFullCode, err = newmigrate.AppendNewCode(newCode, currentFullCode)
 		if err == nil {
 			gencommon.SaveTextFile(newFullCode, filepath.Join(".", "db", "schema"), "migrate.go")
 		} else {
-			fmt.Println("--------------------------------------")
+			fmt.Printf("\n\033[93mwarn:\033[39m : %s", err)
+			fmt.Println("\n")
+			fmt.Println("Edit file \"db/schema/migrate.go\" and append this new code bellow at \"func Migrate()\"")
 			fmt.Println("")
-			fmt.Printf("\033[93mwarn:\033[39m ")
-			fmt.Println(err)
-			fmt.Println("Edit file \"db/schema/migrate.go\" and add this new line bellow at \"func Migrate()\"")
+			fmt.Println("\t" + newCode)
 			fmt.Println("")
-			fmt.Println(newCode)
-			fmt.Println("")
-			fmt.Println("--------------------------------------\n")
 		}
 	}
 }

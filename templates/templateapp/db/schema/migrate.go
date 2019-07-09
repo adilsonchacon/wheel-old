@@ -5,10 +5,10 @@ var Path = []string{"db", "schema", "migrate.go"}
 var Content = `package schema
 
 import (
-	"{{ .AppDomain }}/app/user"
-	"{{ .AppDomain }}/commons/app/model"
-	"{{ .AppDomain }}/commons/crypto"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/app/user"
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/crypto"
+	"{{ .AppRepository }}/db/entities"
 )
 
 func Migrate() {

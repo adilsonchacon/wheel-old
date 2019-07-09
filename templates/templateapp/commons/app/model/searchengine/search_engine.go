@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"{{ .AppDomain }}/commons/app/model"
-	"{{ .AppDomain }}/commons/log"
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/log"
 )
 
 func Query(table interface{}, criteria map[string]string, logic string) (string, []interface{}) {

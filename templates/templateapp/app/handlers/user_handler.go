@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
-	"{{ .AppDomain }}/app/user"
-	"{{ .AppDomain }}/commons/app/handler"
-	"{{ .AppDomain }}/commons/app/model"
-	"{{ .AppDomain }}/commons/app/view"
-	"{{ .AppDomain }}/commons/log"
-	"{{ .AppDomain }}/db/entities"
+	"{{ .AppRepository }}/app/user"
+	"{{ .AppRepository }}/commons/app/handler"
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/app/view"
+	"{{ .AppRepository }}/commons/log"
+	"{{ .AppRepository }}/db/entities"
 )
 
 func UserCreate(w http.ResponseWriter, r *http.Request) {
