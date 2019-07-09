@@ -96,7 +96,7 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 		currentFullCode = gencommon.ReadTextFile(filepath.Join(".", "routes"), "routes.go")
 		newFullCode, err = newroutes.AppendNewCode(newCode, currentFullCode)
 		if err == nil {
-			gencommon.SaveTextFile(newFullCode, filepath.Join(".", "routes"), "routes.go")
+			gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "routes"), "routes.go")
 		} else {
 			fmt.Printf("\n\033[93mwarn:\033[39m : %s", err)
 			fmt.Println("\n")
@@ -111,7 +111,7 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 		currentFullCode = gencommon.ReadTextFile(filepath.Join(".", "db", "schema"), "migrate.go")
 		newFullCode, err = newmigrate.AppendNewCode(newCode, currentFullCode)
 		if err == nil {
-			gencommon.SaveTextFile(newFullCode, filepath.Join(".", "db", "schema"), "migrate.go")
+			gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "db", "schema"), "migrate.go")
 		} else {
 			fmt.Printf("\n\033[93mwarn:\033[39m : %s", err)
 			fmt.Println("\n")

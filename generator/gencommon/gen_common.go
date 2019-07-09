@@ -1,6 +1,7 @@
 package gencommon
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"gopkg.in/yaml.v2"
@@ -44,7 +45,22 @@ type TemplateVar struct {
 	EntityColumns []EntityColumn
 }
 
+var yesToAll = false
+
+func DirOrFileExists(fullPath string) bool {
+	_, err := os.Stat(fullPath)
+	return !os.IsNotExist(err)
+}
+
+func UpdateTextFile(content string, filePath string, fileName string) {
+	persistFile(content, filePath, fileName, "a")
+}
+
 func SaveTextFile(content string, filePath string, fileName string) {
+	persistFile(content, filePath, fileName, "w")
+}
+
+func persistFile(content string, filePath string, fileName string, pseudoMode string) {
 	if err := os.MkdirAll(filePath, 0775); err != nil {
 		log.Fatal(err)
 	}
@@ -62,9 +78,21 @@ func SaveTextFile(content string, filePath string, fileName string) {
 		panic(err)
 	}
 
-	fmt.Println("\033[32mcreated:\033[39m ", fullPath)
-
 	f.Sync()
+
+	switch pseudoMode {
+	case "w":
+		fmt.Println("\033[32mcreated:\033[39m ", filepath.Join(filePath, fileName))
+	case "a":
+		fmt.Println("\033[36mupdated:\033[39m ", filepath.Join(filePath, fileName))
+	case "i":
+		fmt.Println("\033[34midentical:\033[39m ", filepath.Join(filePath, fileName))
+	case "f":
+		fmt.Println("\033[33mforce:\033[39m ", filepath.Join(filePath, fileName))
+	case "s":
+		fmt.Println("\033[33mforce:\033[39m ", filepath.Join(filePath, fileName))
+	}
+
 }
 
 func ReadBytesFile(filePath string, fileName string) []byte {
@@ -81,6 +109,13 @@ func ReadBytesFile(filePath string, fileName string) []byte {
 
 func ReadTextFile(filePath string, fileName string) string {
 	return string(ReadBytesFile(filePath, fileName))
+}
+
+func DestroyDirOrFile(fullPath string) {
+	err := os.Remove(fullPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func GetAppConfig() map[string]string {
@@ -148,10 +183,75 @@ func GenerateFromTemplateFile(templatePath string, templateVar TemplateVar) stri
 	return content.String()
 }
 
+func overwriteFile(fullPath string) string {
+	var pseudoMode string
+
+	if yesToAll {
+		return "f"
+	}
+
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		fmt.Print("Overwrite " + fullPath + "? (enter \"h\" for help) [Ynaqdhm] ")
+		text, _ := reader.ReadString('\n')
+		text = strings.Replace(text, "\n", "", -1)
+
+		switch text {
+		case "Y":
+			pseudoMode = "f"
+		case "n":
+			pseudoMode = "s"
+		case "a":
+			yesToAll = true
+			pseudoMode = "f"
+		case "q":
+			log.Fatal("Aborting...")
+		default:
+			fmt.Println(overwriteFileHelp())
+			pseudoMode = ""
+		}
+
+		if pseudoMode == "f" || pseudoMode == "s" {
+			break
+		}
+	}
+
+	return pseudoMode
+}
+
+func overwriteFileHelp() string {
+	return `
+        Y - yes, overwrite
+        n - no, do not overwrite
+        a - all, overwrite this and all others
+        q - quit, abort
+        d - diff, show the differences between the old and the new
+        h - help, show this help
+        m - merge, run merge tool`
+}
+
 func GeneratePathAndFileFromTemplateString(path []string, content string, templateVar TemplateVar) {
-	fileName, filePath := path[len(path)-1], path[:len(path)-1]
+	fileName, filePathSliced := path[len(path)-1], path[:len(path)-1]
+	filePath := sliceToPath(filePathSliced)
+	pseudoMode := "w"
+	fullPath := filepath.Join(filePath, fileName)
+
 	content = GenerateFromTemplateString(content, templateVar)
-	SaveTextFile(content, sliceToPath(filePath), fileName)
+
+	if DirOrFileExists(fullPath) {
+		if content == ReadTextFile(filePath, fileName) {
+			pseudoMode = "i"
+		} else {
+			pseudoMode = overwriteFile(fullPath)
+		}
+	}
+
+	if pseudoMode == "s" {
+		fmt.Println("\033[33mskip:\033[39m ", fullPath)
+	} else {
+		persistFile(content, filePath, fileName, pseudoMode)
+	}
 }
 
 func CreatePathAndFileFromTemplateString(path []string, content string, templateVar TemplateVar) {
@@ -210,6 +310,10 @@ func BuildRootAppPath(appRepository string) string {
 	urlPaths := strings.Split(appRepository, "/")
 	for _, element := range urlPaths {
 		path = filepath.Join(path, element)
+	}
+
+	if DirOrFileExists(path) {
+		log.Fatal("Sorry, could not create new app. Directory \"" + path + "\" exists")
 	}
 
 	return path
