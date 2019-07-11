@@ -24,7 +24,7 @@ func main() {
 	flag.StringVar(&port, "port", "8081", "http server port")
 	flag.Parse()
 
-	log.Info.Println("starting app", config.AppName())
+	log.Info.Println("starting app", config.App.AppName)
 
 	model.Connect()
 

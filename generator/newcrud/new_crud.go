@@ -1,12 +1,13 @@
 package newcrud
 
 import (
-	"fmt"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 	"path/filepath"
 	"strings"
+	"wheel.smart26.com/commons/notify"
 	"wheel.smart26.com/generator/gencommon"
+	"wheel.smart26.com/generator/newauthorize"
 	"wheel.smart26.com/generator/newmigrate"
 	"wheel.smart26.com/generator/newroutes"
 	"wheel.smart26.com/templates/templatecrud"
@@ -69,15 +70,15 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 		LowerCase:            strings.ToLower(strcase.ToCamel(entityName)),
 	}
 
-	templateVar = gencommon.TemplateVar{AppRepository: gencommon.GetAppConfig()["app_repository"], EntityName: tEntityName, EntityColumns: entityColumns}
+	templateVar = gencommon.TemplateVar{AppRepository: gencommon.GetAppConfig().AppRepository, EntityName: tEntityName, EntityColumns: entityColumns}
 
 	if options["model"] {
-		path = []string{".", "app", tEntityName.SnakeCase + "_model.go"}
+		path = []string{".", "app", tEntityName.LowerCase, tEntityName.SnakeCase + "_model.go"}
 		gencommon.GeneratePathAndFileFromTemplateString(path, templatecrud.ModelContent, templateVar)
 	}
 
 	if options["view"] {
-		path = []string{".", "app", tEntityName.SnakeCase + "_view.go"}
+		path = []string{".", "app", tEntityName.LowerCase, tEntityName.SnakeCase + "_view.go"}
 		gencommon.GeneratePathAndFileFromTemplateString(path, templatecrud.ViewContent, templateVar)
 	}
 
@@ -98,11 +99,7 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 		if err == nil {
 			gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "routes"), "routes.go")
 		} else {
-			fmt.Printf("\n\033[93mwarn:\033[39m : %s", err)
-			fmt.Println("\n")
-			fmt.Println("Edit file \"routes/routes.go\" and append this new code bellow to \"func Routes()\"")
-			fmt.Println(newCode)
-			fmt.Println("")
+			notify.WarnAppendToRoutes(err, newCode)
 		}
 	}
 
@@ -113,12 +110,19 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 		if err == nil {
 			gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "db", "schema"), "migrate.go")
 		} else {
-			fmt.Printf("\n\033[93mwarn:\033[39m : %s", err)
-			fmt.Println("\n")
-			fmt.Println("Edit file \"db/schema/migrate.go\" and append this new code bellow at \"func Migrate()\"")
-			fmt.Println("")
-			fmt.Println("\t" + newCode)
-			fmt.Println("")
+			notify.WarnAppendToMigrate(err, newCode)
 		}
 	}
+
+	if options["authorize"] {
+		newCode = gencommon.GenerateAuthorizeNewCode(templatecrud.AuthorizeContent, templateVar)
+		currentFullCode = gencommon.ReadTextFile(filepath.Join(".", "routes"), "authorize.go")
+		newFullCode, err = newauthorize.AppendNewCode(newCode, currentFullCode)
+		if err == nil {
+			gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "routes"), "authorize.go")
+		} else {
+			notify.WarnAppendToAuthorize(err, newCode)
+		}
+	}
+
 }

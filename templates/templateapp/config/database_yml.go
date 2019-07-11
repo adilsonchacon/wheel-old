@@ -1,6 +1,6 @@
 package config
 
-var DatabasePath = []string{"config", "database.example.yml"}
+var DatabasePath = []string{"config", "database.yml"}
 
 var DatabaseContent = `host: localhost
 port: 5432

@@ -4,13 +4,8 @@ var ModelContent = `package {{ .EntityName.LowerCase }}
 
 import (
 	"errors"
-	"regexp"
-	"strings"
-	"time"
 	"{{ .AppRepository }}/commons/app/model"
 	"{{ .AppRepository }}/commons/app/model/pagination"
-	"{{ .AppRepository }}/commons/crypto"
-	"{{ .AppRepository }}/config"
 	"{{ .AppRepository }}/db/entities"
 )
 
@@ -27,7 +22,7 @@ func Find(id interface{}) (entities.{{ .EntityName.CamelCase }}, error) {
 		err = errors.New(NotFound)
 	}
 
-	return user, err
+	return {{ .EntityName.LowerCamelCase }}, err
 }
 
 func FindAll() []entities.{{ .EntityName.CamelCase }} {
@@ -39,7 +34,6 @@ func FindAll() []entities.{{ .EntityName.CamelCase }} {
 }
 
 func IsValid({{ .EntityName.LowerCamelCase }} *entities.{{ .EntityName.CamelCase }}) (bool, []error) {
-	var count int
 	var errs []error
 
 	return (len(errs) == 0), errs
@@ -82,8 +76,6 @@ func Update({{ .EntityName.LowerCamelCase }} *entities.{{ .EntityName.CamelCase 
 func Create({{ .EntityName.LowerCamelCase }} *entities.{{ .EntityName.CamelCase }}) (bool, []error) {
 	valid, errs := IsValid({{ .EntityName.LowerCamelCase }})
 	if valid && model.Db.NewRecord({{ .EntityName.LowerCamelCase }}) {
-		user.Password = crypto.SetPassword({{ .EntityName.LowerCamelCase }}.Password)
-
 		model.Db.Create(&{{ .EntityName.LowerCamelCase }})
 
 		if model.Db.NewRecord({{ .EntityName.LowerCamelCase }}) {
@@ -114,7 +106,7 @@ func Destroy({{ .EntityName.LowerCamelCase }} *entities.{{ .EntityName.CamelCase
 
 func Paginate(criteria map[string]string, page interface{}, perPage interface{}) ([]entities.{{ .EntityName.CamelCase }}, int, int, int) {
 	var {{ .EntityName.LowerCamelCasePlural }} []entities.{{ .EntityName.CamelCase }}
-	var user entities.{{ .EntityName.CamelCase }}
+	var {{ .EntityName.LowerCamelCase }} entities.{{ .EntityName.CamelCase }}
 
 	search, currentPage, totalPages, totalEntries := pagination.Query(&{{ .EntityName.LowerCamelCase }}, criteria, page, perPage)
 

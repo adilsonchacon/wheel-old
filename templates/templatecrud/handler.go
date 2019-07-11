@@ -44,7 +44,7 @@ func {{ .EntityName.CamelCase }}Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	{{ .EntityName.CamelCase }}SetParams(&{{ .EntityName.LowerCamelCase }}Current, r)
+	{{ .EntityName.LowerCamelCase }}SetParams(&{{ .EntityName.LowerCamelCase }}Current, r)
 
 	if valid, errs := {{ .EntityName.LowerCase }}.Update(&{{ .EntityName.LowerCamelCase }}Current); valid {
 		json.NewEncoder(w).Encode({{ .EntityName.LowerCase }}.SuccessfullySavedJson{SystemMessage: view.SetSystemMessage("notice", "{{ .EntityName.SnakeCase }} was successfully updated"), {{ .EntityName.CamelCase }}: {{ .EntityName.LowerCase }}.SetJson({{ .EntityName.LowerCamelCase }}Current)})
@@ -105,7 +105,7 @@ func {{ .EntityName.LowerCamelCase }}SetParams({{ .EntityName.LowerCamelCase }}S
   {{- $filteredEntityColumns := filterEntityColumnsNotForeignKeys .EntityColumns }}
 	var allowedParams = []string{ {{- range $index, $element := $filteredEntityColumns }} "{{ $element.NameSnakeCase }}" {{- if isNotLastIndex $index $filteredEntityColumns }}, {{- end }} {{- end }} }
 
-	r.ParseMultipartForm()
+	r.ParseMultipartForm(100 * 1024)
 
 	for key := range r.Form {
 		for _, allowedParam := range allowedParams {

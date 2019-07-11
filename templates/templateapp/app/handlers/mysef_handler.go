@@ -77,7 +77,7 @@ func MyselfShow(w http.ResponseWriter, r *http.Request) {
 func myselfSetParams(userMyself *entities.User, r *http.Request) {
 	var allowedParams = []string{"name", "locale"}
 
-	r.ParseMultipartForm()
+	r.ParseMultipartForm(100 * 1024)
 
 	for key := range r.Form {
 		for _, allowedParam := range allowedParams {

@@ -3,10 +3,8 @@ package gencommon
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"os/user"
@@ -16,7 +14,18 @@ import (
 	"strings"
 	"text/template"
 	"time"
+	"wheel.smart26.com/commons/notify"
 )
+
+type AppConfig struct {
+	AppName                        string   `yaml:"app_name"`
+	AppRepository                  string   `yaml:"app_repository"`
+	SecretKey                      string   `yaml:"secret_key"`
+	ResetPasswordExpirationSeconds int      `yaml:"reset_password_expiration_seconds"`
+	ResetPasswordUrl               string   `yaml:"reset_password_url"`
+	TokenExpirationSeconds         int      `yaml:"token_expiration_seconds"`
+	Locales                        []string `yaml:"locales"`
+}
 
 type EntityColumn struct {
 	Name          string
@@ -61,45 +70,40 @@ func SaveTextFile(content string, filePath string, fileName string) {
 }
 
 func persistFile(content string, filePath string, fileName string, pseudoMode string) {
-	if err := os.MkdirAll(filePath, 0775); err != nil {
-		log.Fatal(err)
-	}
+	err := os.MkdirAll(filePath, 0775)
+	notify.FatalIfError(err)
 
 	fullPath := filepath.Join(filePath, fileName)
 
 	f, err := os.Create(fullPath)
-	if err != nil {
-		panic(err)
-	}
+	notify.FatalIfError(err)
+
 	defer f.Close()
 
 	_, err = f.WriteString(content)
-	if err != nil {
-		panic(err)
-	}
+	notify.FatalIfError(err)
 
 	f.Sync()
 
 	switch pseudoMode {
 	case "w":
-		fmt.Println("\033[32mcreated:\033[39m ", filepath.Join(filePath, fileName))
+		notify.Created(fullPath)
 	case "a":
-		fmt.Println("\033[36mupdated:\033[39m ", filepath.Join(filePath, fileName))
+		notify.Updated(fullPath)
 	case "i":
-		fmt.Println("\033[34midentical:\033[39m ", filepath.Join(filePath, fileName))
+		notify.Identical(fullPath)
 	case "f":
-		fmt.Println("\033[33mforce:\033[39m ", filepath.Join(filePath, fileName))
+		notify.Force(fullPath)
 	case "s":
-		fmt.Println("\033[33mforce:\033[39m ", filepath.Join(filePath, fileName))
+		notify.Skip(fullPath)
 	}
 
 }
 
 func ReadBytesFile(filePath string, fileName string) []byte {
 	file, err := os.Open(filepath.Join(filePath, fileName))
-	if err != nil {
-		log.Fatal(err)
-	}
+	notify.FatalIfError(err)
+
 	defer file.Close()
 
 	b, err := ioutil.ReadAll(file)
@@ -113,24 +117,16 @@ func ReadTextFile(filePath string, fileName string) string {
 
 func DestroyDirOrFile(fullPath string) {
 	err := os.Remove(fullPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	notify.FatalIfError(err)
 }
 
-func GetAppConfig() map[string]string {
-	config := make(map[string]string)
+func GetAppConfig() AppConfig {
+	var appConfig AppConfig
 
-	err := yaml.Unmarshal(ReadBytesFile(filepath.Join(".", "config"), "app.yml"), &config)
-	if err != nil {
-		log.Fatal("error: %v\n", err)
-	}
+	err := yaml.Unmarshal(ReadBytesFile(filepath.Join(".", "config"), "app.yml"), &appConfig)
+	notify.FatalIfError(err)
 
-	if config["pool"] == "" {
-		config["pool"] = "5"
-	}
-
-	return config
+	return appConfig
 }
 
 func GenerateFromTemplateString(content string, templateVar TemplateVar) string {
@@ -155,14 +151,10 @@ func GenerateFromTemplateString(content string, templateVar TemplateVar) string 
 	}
 
 	tmpl, err := template.New("T").Funcs(FuncMap).Parse(content)
-	if err != nil {
-		log.Fatal(err)
-	}
+	notify.FatalIfError(err)
 
 	err = tmpl.Execute(&buffContent, templateVar)
-	if err != nil {
-		log.Fatal(err)
-	}
+	notify.FatalIfError(err)
 
 	return buffContent.String()
 }
@@ -171,14 +163,10 @@ func GenerateFromTemplateFile(templatePath string, templateVar TemplateVar) stri
 	var content bytes.Buffer
 
 	tmpl, err := template.ParseFiles(templatePath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	notify.FatalIfError(err)
 
 	err = tmpl.Execute(&content, &templateVar)
-	if err != nil {
-		log.Fatal(err)
-	}
+	notify.FatalIfError(err)
 
 	return content.String()
 }
@@ -193,7 +181,7 @@ func overwriteFile(fullPath string) string {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		fmt.Print("Overwrite " + fullPath + "? (enter \"h\" for help) [Ynaqdhm] ")
+		notify.Simple("Overwrite " + fullPath + "? (enter \"h\" for help) [Ynaqdhm] ")
 		text, _ := reader.ReadString('\n')
 		text = strings.Replace(text, "\n", "", -1)
 
@@ -206,9 +194,9 @@ func overwriteFile(fullPath string) string {
 			yesToAll = true
 			pseudoMode = "f"
 		case "q":
-			log.Fatal("Aborting...")
+			notify.Fatal("Aborting...")
 		default:
-			fmt.Println(overwriteFileHelp())
+			notify.Simple(overwriteFileHelp())
 			pseudoMode = ""
 		}
 
@@ -228,7 +216,9 @@ func overwriteFileHelp() string {
         q - quit, abort
         d - diff, show the differences between the old and the new
         h - help, show this help
-        m - merge, run merge tool`
+        m - merge, run merge tool
+
+`
 }
 
 func GeneratePathAndFileFromTemplateString(path []string, content string, templateVar TemplateVar) {
@@ -248,7 +238,7 @@ func GeneratePathAndFileFromTemplateString(path []string, content string, templa
 	}
 
 	if pseudoMode == "s" {
-		fmt.Println("\033[33mskip:\033[39m ", fullPath)
+		notify.Skip(fullPath)
 	} else {
 		persistFile(content, filePath, fileName, pseudoMode)
 	}
@@ -264,6 +254,10 @@ func GenerateRoutesNewCode(content string, templateVar TemplateVar) string {
 }
 
 func GenerateMigrateNewCode(content string, templateVar TemplateVar) string {
+	return GenerateFromTemplateString(content, templateVar)
+}
+
+func GenerateAuthorizeNewCode(content string, templateVar TemplateVar) string {
 	return GenerateFromTemplateString(content, templateVar)
 }
 
@@ -296,14 +290,10 @@ func SecureRandom(size int) string {
 
 func BuildRootAppPath(appRepository string) string {
 	_, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
+	notify.FatalIfError(err)
 
 	usr, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
+	notify.FatalIfError(err)
 
 	path := filepath.Join(usr.HomeDir, "go", "src")
 
@@ -313,18 +303,17 @@ func BuildRootAppPath(appRepository string) string {
 	}
 
 	if DirOrFileExists(path) {
-		log.Fatal("Sorry, could not create new app. Directory \"" + path + "\" exists")
+		notify.Fatal("Sorry, could not create new app. Directory \"" + path + "\" already exists")
 	}
 
 	return path
 }
 
 func CreateRootAppPath(rootAppPath string) {
-	if err := os.MkdirAll(rootAppPath, 0775); err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("created:", rootAppPath)
-	}
+	err := os.MkdirAll(rootAppPath, 0775)
+	notify.FatalIfError(err)
+
+	notify.Created(rootAppPath)
 }
 
 func GetColumnInfo(columnName string, columnType string, extra string) (string, string, string, bool) {

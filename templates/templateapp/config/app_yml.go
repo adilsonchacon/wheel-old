@@ -1,6 +1,6 @@
 package config
 
-var AppPath = []string{"config", "app.example.yml"}
+var AppPath = []string{"config", "app.yml"}
 
 var AppContent = `app_name: "{{ .AppName }}"
 app_repository: "{{ .AppRepository }}"

@@ -1,4 +1,4 @@
-package newmigrate
+package newauthorize
 
 import (
 	"errors"
@@ -13,13 +13,10 @@ const (
 	funcCharWasFoundN = 3
 	funcCharWasFoundC = 4
 
-	migrateCharWasFoundM = 5
-	migrateCharWasFoundI = 6
-	migrateCharWasFoundG = 7
-	migrateCharWasFoundR = 8
-	migrateCharWasFoundA = 9
-	migrateCharWasFoundT = 10
-	migrateCharWasFoundE = 11
+	initCharWasFoundI  = 5
+	initCharWasFoundN  = 6
+	initCharWasFoundI2 = 7
+	initCharWasFoundT  = 8
 
 	commentSingleLine = 12
 	commentMultiLine  = 13
@@ -36,7 +33,7 @@ var lastCharWasSlash bool
 var lastCharWasStar bool
 var stateBeforeComment int
 
-func insideFuncMigrate(i int) {
+func insideFuncInit(i int) {
 	if currentChar == "{" && (len(stack) == 0 || (len(stack) > 0 && stack[len(stack)-1] == "{")) {
 		stack = append(stack, currentChar)
 	} else if currentChar == "}" && stack[len(stack)-1] == "{" {
@@ -92,28 +89,22 @@ func AppendNewCode(newLine string, code string) (string, error) {
 			currentState = funcCharWasFoundN
 		} else if currentChar == "c" && currentState == funcCharWasFoundN {
 			currentState = funcCharWasFoundC
-		} else if currentChar == "M" && currentState == funcCharWasFoundC {
-			currentState = migrateCharWasFoundM
-		} else if currentChar == "i" && currentState == migrateCharWasFoundM {
-			currentState = migrateCharWasFoundI
-		} else if currentChar == "g" && currentState == migrateCharWasFoundI {
-			currentState = migrateCharWasFoundG
-		} else if currentChar == "r" && currentState == migrateCharWasFoundG {
-			currentState = migrateCharWasFoundR
-		} else if currentChar == "a" && currentState == migrateCharWasFoundR {
-			currentState = migrateCharWasFoundA
-		} else if currentChar == "t" && currentState == migrateCharWasFoundA {
-			currentState = migrateCharWasFoundT
-		} else if currentChar == "e" && currentState == migrateCharWasFoundT {
-			currentState = migrateCharWasFoundE
+		} else if currentChar == "i" && currentState == funcCharWasFoundC {
+			currentState = initCharWasFoundI
+		} else if currentChar == "n" && currentState == initCharWasFoundI {
+			currentState = initCharWasFoundN
+		} else if currentChar == "i" && currentState == initCharWasFoundN {
+			currentState = initCharWasFoundI2
+		} else if currentChar == "t" && currentState == initCharWasFoundI2 {
+			currentState = initCharWasFoundT
 		} else if currentChar == "/" && lastCharWasSlash && currentState != commentMultiLine {
 			stateBeforeComment = currentState
 			currentState = commentSingleLine
 		} else if currentChar == "*" && lastCharWasSlash && currentState != commentSingleLine {
 			stateBeforeComment = currentState
 			currentState = commentMultiLine
-		} else if currentState == migrateCharWasFoundE {
-			insideFuncMigrate(i)
+		} else if currentState == initCharWasFoundT {
+			insideFuncInit(i)
 		} else if currentState == commentSingleLine {
 			insideCommentSingleLine()
 		} else if currentState == commentMultiLine {
@@ -126,10 +117,10 @@ func AppendNewCode(newLine string, code string) (string, error) {
 		lastCharWasSlash = (currentChar == "/")
 	}
 
-	if currentState == migrateCharWasFoundE && len(stack) == 0 {
+	if currentState == initCharWasFoundT && len(stack) == 0 {
 		outputStr = code[0:lastCloseBracket-1] + "\n    " + newLine + "\n" + code[lastCloseBracket-1:len(code)]
 	} else {
-		err = errors.New("Could not parse Migrate file.")
+		err = errors.New("Could not parse Authorize file.")
 	}
 
 	return outputStr, err

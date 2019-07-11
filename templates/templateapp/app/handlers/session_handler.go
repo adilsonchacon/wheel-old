@@ -192,10 +192,10 @@ func SessionCheck(token string) (uint, error) {
 }
 
 func sessionBuildClaims(jti string, userSession *entities.User) (jwt.MapClaims, time.Time) {
-	expiresAt := time.Now().Add(time.Second * time.Duration(config.TokenExpirationSeconds()))
+	expiresAt := time.Now().Add(time.Second * time.Duration(config.App.TokenExpirationSeconds))
 
 	claims := make(jwt.MapClaims)
-	claims["iss"] = config.AppRepository()
+	claims["iss"] = config.App.AppRepository
 	claims["exp"] = expiresAt.Unix()
 	claims["jti"] = jti
 	claims["uid"] = userSession.ID
@@ -276,7 +276,7 @@ func sessionGenerateToken(userSession entities.User, remoteAddr string) string {
 
 	t := time.Now()
 	ip, _, _ := net.SplitHostPort(remoteAddr)
-	sessionNew = entities.Session{Jti: jti, App: "Default", Requests: 0, LastRequestAt: &t, UserID: userSession.ID, Address: ip, ExpiresIn: config.TokenExpirationSeconds(), ExpiresAt: expiresAt}
+	sessionNew = entities.Session{Jti: jti, App: "Default", Requests: 0, LastRequestAt: &t, UserID: userSession.ID, Address: ip, ExpiresIn: config.App.TokenExpirationSeconds, ExpiresAt: expiresAt}
 	session.Save(&sessionNew)
 
 	return token

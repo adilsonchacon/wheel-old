@@ -11,44 +11,16 @@ import (
 )
 
 type AppConfig struct {
-	App_name                          string
-	App_repository                        string
-	Secret_key                        string
-	Reset_password_expiration_seconds int
-	Reset_password_url                string
-	Token_expiration_seconds          int
-	Locales                           []string
+	AppName                        string   ` + "`" + `yaml:"app_name"` + "`" + `
+	AppRepository                  string   ` + "`" + `yaml:"app_repository"` + "`" + `
+	SecretKey                      string   ` + "`" + `yaml:"secret_key"` + "`" + `
+	ResetPasswordExpirationSeconds int      ` + "`" + `yaml:"reset_password_expiration_seconds"` + "`" + `
+	ResetPasswordUrl               string   ` + "`" + `yaml:"reset_password_url"` + "`" + `
+	TokenExpirationSeconds         int      ` + "`" + `yaml:"token_expiration_seconds"` + "`" + `
+	Locales                        []string ` + "`" + `yaml:"locales"` + "`" + `
 }
 
-var appConfig AppConfig
-
-func AppName() string {
-	return appConfig.App_name
-}
-
-func AppRepository() string {
-	return appConfig.App_repository
-}
-
-func SecretKey() string {
-	return appConfig.Secret_key
-}
-
-func ResetPasswordExpirationSeconds() int {
-	return appConfig.Reset_password_expiration_seconds
-}
-
-func ResetPasswordUrl() string {
-	return appConfig.Reset_password_url
-}
-
-func TokenExpirationSeconds() int {
-	return appConfig.Token_expiration_seconds
-}
-
-func Locales() []string {
-	return appConfig.Locales
-}
+var App AppConfig
 
 func readAppConfigFile() []byte {
 	data, err := ioutil.ReadFile("./config/app.yml")
@@ -60,7 +32,7 @@ func readAppConfigFile() []byte {
 }
 
 func init() {
-	err := yaml.Unmarshal(readAppConfigFile(), &appConfig)
+	err := yaml.Unmarshal(readAppConfigFile(), &App)
 	if err != nil {
 		log.Error.Fatalf("error: %v", err)
 	}

@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
+	"wheel.smart26.com/commons/notify"
 	"wheel.smart26.com/generator"
 	"wheel.smart26.com/help"
 	"wheel.smart26.com/version"
@@ -27,7 +27,7 @@ func CheckDependences() {
 	var out bytes.Buffer
 	var hasDependence bool
 
-	fmt.Println("Checking dependences...")
+	notify.Simpleln("Checking dependences...")
 
 	cmd := exec.Command("go", "list", "...")
 	cmd.Stdout = &out
@@ -50,16 +50,15 @@ func CheckDependences() {
 		}
 
 		if !hasDependence {
-			fmt.Printf("package %s was not found, installing...\n", requiredDependence)
+			notify.Simple(fmt.Sprintf("package %s was not found, installing...", requiredDependence))
 			cmd := exec.Command("go", "get", requiredDependence)
 			cmd.Stdout = &out
-			if err := cmd.Run(); err != nil {
-				log.Fatal(err)
-			} else {
-				fmt.Printf("package %s was successfully installed\n", requiredDependence)
-			}
+			err := cmd.Run()
+			notify.FatalIfError(err)
+
+			notify.Simpleln(fmt.Sprintf("package %s was successfully installed", requiredDependence))
 		} else {
-			fmt.Printf("package %s was found\n", requiredDependence)
+			notify.Simpleln(fmt.Sprintf("package %s was found", requiredDependence))
 		}
 	}
 }
@@ -67,11 +66,7 @@ func CheckDependences() {
 func handleNewApp(args []string) {
 	var options = make(map[string]string)
 
-	fmt.Println(os.Args[2])
 	preOptions := strings.Split(os.Args[2], "/")
-	fmt.Println(preOptions)
-	fmt.Println(len(preOptions) - 1)
-	fmt.Println(preOptions[2])
 
 	options["app_name"] = preOptions[len(preOptions)-1]
 	options["app_repository"] = os.Args[2]
@@ -92,6 +87,7 @@ func buildGenerateOptions(args []string) (map[string]bool, error) {
 	options["handler"] = false
 	options["routes"] = false
 	options["migrate"] = false
+	options["authorize"] = false
 
 	switch subject {
 	case "scaffold":
@@ -101,6 +97,7 @@ func buildGenerateOptions(args []string) (map[string]bool, error) {
 		options["handler"] = true
 		options["routes"] = true
 		options["migrate"] = true
+		options["authorize"] = true
 		if len(args) < 4 {
 			err = errors.New("invalid scaffold name")
 		}
@@ -145,29 +142,26 @@ func handleGenerate(args []string) {
 	var err error
 
 	options, err = buildGenerateOptions(args)
-	if err == nil {
-		handleGenerateNewCrud(args, options)
-	} else {
-		fmt.Println(err)
-	}
+	notify.FatalIfError(err)
+
+	handleGenerateNewCrud(args, options)
 }
 
 func handleHelp() {
-	fmt.Println(help.Content)
+	notify.Simpleln(help.Content)
 }
 
 func handleVersion() {
-	fmt.Println(version.Content)
+	notify.Simpleln(version.Content)
 }
 
 func main() {
 	command := os.Args[1]
-	fmt.Println("command:", command)
 
 	if !IsGoInstalled() {
-		log.Fatal("\"Go\" seems not installed")
+		notify.FatalIfError(errors.New("\"Go\" seems not installed"))
 	} else {
-		fmt.Println("\"Go\" seems installed")
+		notify.Simpleln("\"Go\" seems installed")
 		CheckDependences()
 	}
 

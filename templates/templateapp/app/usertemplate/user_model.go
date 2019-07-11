@@ -162,8 +162,8 @@ func FindByResetPasswordToken(token string) (entities.User, error) {
 	var user entities.User
 	var err error
 
-	enconded_token := crypto.EncryptText(token, config.SecretKey())
-	two_days_ago := time.Now().Add(time.Second * time.Duration(config.ResetPasswordExpirationSeconds()) * (-1))
+	enconded_token := crypto.EncryptText(token, config.App.SecretKey)
+	two_days_ago := time.Now().Add(time.Second * time.Duration(config.App.ResetPasswordExpirationSeconds) * (-1))
 
 	model.Db.Where("reset_password_token = ? AND reset_password_sent_at >= ? AND deleted_at IS NULL", enconded_token, two_days_ago).First(&user)
 	if model.Db.NewRecord(user) {
@@ -225,7 +225,7 @@ func SetRecovery(user *entities.User) (string, []error) {
 	} else {
 		t := time.Now()
 		user.ResetPasswordSentAt = &t
-		user.ResetPasswordToken = crypto.EncryptText(token, config.SecretKey())
+		user.ResetPasswordToken = crypto.EncryptText(token, config.App.SecretKey)
 
 		valid, errs := Save(user)
 
@@ -256,7 +256,7 @@ func FirstName(user *entities.User) string {
 // local methods
 
 func isLocaleValid(locale string) bool {
-	locales := config.Locales()
+	locales := config.App.Locales
 
 	for _, a := range locales {
 		if a == locale {
