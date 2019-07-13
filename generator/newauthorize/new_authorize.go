@@ -3,6 +3,7 @@ package newauthorize
 import (
 	"errors"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -27,7 +28,6 @@ var currentState int
 var currentChar string
 var regexpEmptyChar = regexp.MustCompile(`[\s\t\n\r\f]`)
 var stack []string
-var outputStr string
 var lastCharWasBackSlash bool
 var lastCharWasSlash bool
 var lastCharWasStar bool
@@ -68,9 +68,14 @@ func insideCommentMultiLine() {
 	lastCharWasStar = currentChar == "*"
 }
 
-func AppendNewCode(newLine string, code string) (string, error) {
+func AppendNewCode(newCode string, code string) (string, error) {
 	var err error
 	var i int
+	var outputStr string
+
+	if newCodeAlreadyExists(newCode, code) {
+		return "", nil
+	}
 
 	lastCharWasSlash = false
 	lastCharWasSlash = false
@@ -118,10 +123,28 @@ func AppendNewCode(newLine string, code string) (string, error) {
 	}
 
 	if currentState == initCharWasFoundT && len(stack) == 0 {
-		outputStr = code[0:lastCloseBracket-1] + "\n    " + newLine + "\n" + code[lastCloseBracket-1:len(code)]
+		outputStr = code[0:lastCloseBracket-1] + "\n    " + newCode + "\n" + code[lastCloseBracket-1:len(code)]
 	} else {
 		err = errors.New("Could not parse Authorize file.")
 	}
 
 	return outputStr, err
+}
+
+func newCodeAlreadyExists(newCode string, code string) bool {
+	var found bool
+	var trimRegexp = regexp.MustCompile(`(^[\s\t\n\r\f]+|[\s\t\n\r\f]+$)`)
+
+	found = true
+
+	lines := strings.Split(newCode, "\n")
+	for _, line := range lines {
+		line = trimRegexp.ReplaceAllString(line, ``)
+		if strings.Index(code, line) < 0 {
+			found = false
+			break
+		}
+	}
+
+	return found
 }

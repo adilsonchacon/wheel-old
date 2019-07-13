@@ -47,10 +47,50 @@ func optionToEntityColumn(options string, isForeignKey bool) gencommon.EntityCol
 	}
 }
 
+func setMigrate() {
+	newCode := gencommon.GenerateMigrateNewCode(templatecrud.MigrateContent, templateVar)
+	currentFullCode := gencommon.ReadTextFile(filepath.Join(".", "db", "schema"), "migrate.go")
+	newFullCode, err := newmigrate.AppendNewCode(newCode, currentFullCode)
+
+	if err != nil {
+		notify.WarnAppendToMigrate(err, newCode)
+	} else if newFullCode == "" {
+		notify.Identical(filepath.Join(".", "db", "schema", "migrate.go"))
+	} else {
+		gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "db", "schema"), "migrate.go")
+	}
+}
+
+func setRoutes() {
+	newCode := gencommon.GenerateRoutesNewCode(templatecrud.RoutesContent, templateVar)
+	currentFullCode := gencommon.ReadTextFile(filepath.Join(".", "routes"), "routes.go")
+	newFullCode, err := newroutes.AppendNewCode(newCode, currentFullCode)
+
+	if err != nil {
+		notify.WarnAppendToRoutes(err, newCode)
+	} else if newFullCode == "" {
+		notify.Identical(filepath.Join(".", "routes", "routes.go"))
+	} else {
+		gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "routes"), "routes.go")
+	}
+}
+
+func setAuthorize() {
+	newCode := gencommon.GenerateAuthorizeNewCode(templatecrud.AuthorizeContent, templateVar)
+	currentFullCode := gencommon.ReadTextFile(filepath.Join(".", "routes"), "authorize.go")
+	newFullCode, err := newauthorize.AppendNewCode(newCode, currentFullCode)
+
+	if err != nil {
+		notify.WarnAppendToAuthorize(err, newCode)
+	} else if newFullCode == "" {
+		notify.Identical(filepath.Join(".", "routes", "authorize.go"))
+	} else {
+		gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "routes"), "authorize.go")
+	}
+}
+
 func Generate(entityName string, columns []string, options map[string]bool) {
 	var path []string
-	var newCode, currentFullCode, newFullCode string
-	var err error
 
 	for _, column := range columns {
 		entityColumns = append(entityColumns, optionToEntityColumn(column, false))
@@ -93,36 +133,15 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 	}
 
 	if options["routes"] {
-		newCode = gencommon.GenerateRoutesNewCode(templatecrud.RoutesContent, templateVar)
-		currentFullCode = gencommon.ReadTextFile(filepath.Join(".", "routes"), "routes.go")
-		newFullCode, err = newroutes.AppendNewCode(newCode, currentFullCode)
-		if err == nil {
-			gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "routes"), "routes.go")
-		} else {
-			notify.WarnAppendToRoutes(err, newCode)
-		}
+		setRoutes()
 	}
 
 	if options["migrate"] {
-		newCode = gencommon.GenerateMigrateNewCode(templatecrud.MigrateContent, templateVar)
-		currentFullCode = gencommon.ReadTextFile(filepath.Join(".", "db", "schema"), "migrate.go")
-		newFullCode, err = newmigrate.AppendNewCode(newCode, currentFullCode)
-		if err == nil {
-			gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "db", "schema"), "migrate.go")
-		} else {
-			notify.WarnAppendToMigrate(err, newCode)
-		}
+		setMigrate()
 	}
 
 	if options["authorize"] {
-		newCode = gencommon.GenerateAuthorizeNewCode(templatecrud.AuthorizeContent, templateVar)
-		currentFullCode = gencommon.ReadTextFile(filepath.Join(".", "routes"), "authorize.go")
-		newFullCode, err = newauthorize.AppendNewCode(newCode, currentFullCode)
-		if err == nil {
-			gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "routes"), "authorize.go")
-		} else {
-			notify.WarnAppendToAuthorize(err, newCode)
-		}
+		setAuthorize()
 	}
 
 }

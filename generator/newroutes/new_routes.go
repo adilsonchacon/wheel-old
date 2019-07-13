@@ -3,6 +3,7 @@ package newroutes
 import (
 	"errors"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -41,7 +42,6 @@ var returnRouteAt int
 var regexpEmptyChar = regexp.MustCompile(`[\s\t\n\r\f]`)
 var funcRoutesWasFound bool
 var stack []string
-var outputStr string
 var lastCharWasBackSlash bool
 var lastCharWasSlash bool
 var lastCharWasStar bool
@@ -90,6 +90,11 @@ func insideFuncRoutes(i int) {
 func AppendNewCode(newCode string, code string) (string, error) {
 	var err error
 	var i int
+	var outputStr string
+
+	if newCodeAlreadyExists(newCode, code) {
+		return "", nil
+	}
 
 	funcRoutesWasFound = false
 	currentState = beginning
@@ -142,4 +147,22 @@ func AppendNewCode(newCode string, code string) (string, error) {
 	}
 
 	return outputStr, err
+}
+
+func newCodeAlreadyExists(newCode string, code string) bool {
+	var found bool
+	var trimRegexp = regexp.MustCompile(`(^[\s\t\n\r\f]+|[\s\t\n\r\f]+$)`)
+
+	found = true
+	lines := strings.Split(newCode, "\n")
+
+	for _, line := range lines {
+		line = trimRegexp.ReplaceAllString(line, ``)
+		if strings.Index(code, line) < 0 {
+			found = false
+			break
+		}
+	}
+
+	return found
 }
