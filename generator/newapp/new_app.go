@@ -19,7 +19,6 @@ import (
 	"wheel.smart26.com/templates/templateapp/commons/logtemplate"
 	"wheel.smart26.com/templates/templateapp/commons/mailer"
 	"wheel.smart26.com/templates/templateapp/config"
-	"wheel.smart26.com/templates/templateapp/config/configkeys"
 	"wheel.smart26.com/templates/templateapp/config/configlocales"
 	"wheel.smart26.com/templates/templateapp/db/entities"
 	"wheel.smart26.com/templates/templateapp/db/schema"
@@ -93,9 +92,8 @@ func Generate(options map[string]string) {
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(config.DatabasePath), config.DatabaseContent, templateVar)
 	gencommon.CreatePathAndFileFromTemplateString(prependRootAppPathToPath(config.EmailPath), config.EmailContent, templateVar)
 
-	// config keys
-	gencommon.CreatePathAndFileFromTemplateString(prependRootAppPathToPath(configkeys.RsaExamplePath), configkeys.RsaExampleContent, templateVar)
-	gencommon.CreatePathAndFileFromTemplateString(prependRootAppPathToPath(configkeys.RsaPubExamplePath), configkeys.RsaPubExampleContent, templateVar)
+	// config certs
+	gencommon.GenerateCertificates(rootAppPath)
 
 	// config locales
 	gencommon.CreatePathAndFileFromTemplateString(prependRootAppPathToPath(configlocales.EnPath), configlocales.EnContent, templateVar)
@@ -113,9 +111,6 @@ func Generate(options map[string]string) {
 
 	// main
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(templates.MainPath), templates.MainContent, templateVar)
-
-	// certs
-	gencommon.GenerateCertificates(rootAppPath)
 
 	// Final
 	gencommon.NotifyNewApp(rootAppPath)
