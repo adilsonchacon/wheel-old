@@ -113,4 +113,10 @@ func Generate(options map[string]string) {
 
 	// main
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(templates.MainPath), templates.MainContent, templateVar)
+
+	// certs
+	gencommon.GenerateCertificates(rootAppPath)
+
+	// Final
+	gencommon.NotifyNewApp(rootAppPath)
 }

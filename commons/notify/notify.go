@@ -118,3 +118,16 @@ func WarnAppendToAuthorize(err error, newCode string) {
 	fmt.Println(newCode)
 	fmt.Println("")
 }
+
+func NewApp(rootAppPath string) {
+	fmt.Println("")
+	fmt.Println("Your App was successfully created!")
+	fmt.Println("")
+	fmt.Println("Change to the root directory using the command line below: ")
+	fmt.Println("cd " + rootAppPath)
+	fmt.Println("")
+	fmt.Println("Set up your database connection modifying the file config/database.yml")
+	fmt.Println("")
+	fmt.Println("For more details call help:")
+	fmt.Println("go run main.go --help")
+}

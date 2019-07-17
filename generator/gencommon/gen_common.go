@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"reflect"
@@ -324,6 +325,35 @@ func CreateRootAppPath(rootAppPath string) {
 	notify.FatalIfError(err)
 
 	notify.Created(rootAppPath)
+}
+
+func NotifyNewApp(rootAppPath string) {
+	notify.NewApp(rootAppPath)
+}
+
+func GenerateCertificates(rootAppPath string) {
+	var out bytes.Buffer
+
+	cmd := exec.Command("openssl", "genrsa", "-out", filepath.Join(rootAppPath, "config", "keys", "app.key.rsa"), "2048")
+	cmd.Stdout = &out
+	err := cmd.Run()
+
+	if err != nil {
+		notify.Warn("Could not generate certificates files. Check if openssl is installed and execute both command lines below:")
+		notify.Warn("openssl genrsa -out " + filepath.Join(rootAppPath, "config", "keys", "app.key.rsa") + " 2048")
+		notify.Warn("openssl rsa -in " + filepath.Join(rootAppPath, "config", "keys", "app.key.rsa") + " -pubout > " + filepath.Join(rootAppPath, "config", "keys", "app.key.rsa.pub"))
+	} else {
+		cmd := exec.Command("openssl", "rsa", "-in", filepath.Join(rootAppPath, "config", "keys", "app.key.rsa"), "-pubout")
+		cmd.Stdout = &out
+		err = cmd.Run()
+		if err != nil {
+			notify.Error(err)
+			notify.Warn("Could not generate public certificate file. Check if openssl is installed and execute the command line below:")
+			notify.Warn("openssl rsa -in " + filepath.Join(rootAppPath, "config", "keys", "app.key.rsa") + " -pubout > " + filepath.Join(rootAppPath, "config", "keys", "app.key.rsa.pub"))
+		} else {
+			SaveTextFile(out.String(), filepath.Join(rootAppPath, "config", "keys"), "app.key.rsa.pub")
+		}
+	}
 }
 
 func GetColumnInfo(columnName string, columnType string, extra string) (string, string, string, bool) {
