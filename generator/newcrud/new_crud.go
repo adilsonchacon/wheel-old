@@ -38,12 +38,13 @@ func optionToEntityColumn(options string, isForeignKey bool) gencommon.EntityCol
 	}
 
 	return gencommon.EntityColumn{
-		Name:          strcase.ToCamel(columnName),
-		NameSnakeCase: strcase.ToSnake(columnName),
-		Type:          columnType,
-		Extras:        extra,
-		IsReference:   isReference,
-		IsForeignKey:  isForeignKey,
+		Name:                strcase.ToCamel(columnName),
+		NameSnakeCase:       strcase.ToSnake(columnName),
+		NameSnakeCasePlural: inflection.Plural(strcase.ToSnake(columnName)),
+		Type:                columnType,
+		Extras:              extra,
+		IsReference:         isReference,
+		IsForeignKey:        isForeignKey,
 	}
 }
 

@@ -20,4 +20,5 @@ func Migrate() {
 	}
 
 	model.Db.AutoMigrate(&entities.Session{})
+	model.Db.Model(&entities.Session{}).AddForeignKey("user_id", "users(id)", "NO ACTION", "NO ACTION")
 }`

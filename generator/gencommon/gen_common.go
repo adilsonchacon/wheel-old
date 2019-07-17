@@ -28,12 +28,13 @@ type AppConfig struct {
 }
 
 type EntityColumn struct {
-	Name          string
-	NameSnakeCase string
-	Type          string
-	Extras        string
-	IsReference   bool
-	IsForeignKey  bool
+	Name                string
+	NameSnakeCase       string
+	NameSnakeCasePlural string
+	Type                string
+	Extras              string
+	IsReference         bool
+	IsForeignKey        bool
 }
 
 type EntityName struct {
@@ -147,6 +148,15 @@ func GenerateFromTemplateString(content string, templateVar TemplateVar) string 
 				}
 			}
 			return notForeignKeys
+		},
+		"filterEntityColumnsForeignKeysOnly": func(tEntityColumns []EntityColumn) []EntityColumn {
+			var foreignKeys []EntityColumn
+			for _, element := range tEntityColumns {
+				if element.IsForeignKey {
+					foreignKeys = append(foreignKeys, element)
+				}
+			}
+			return foreignKeys
 		},
 	}
 
@@ -351,7 +361,7 @@ func GetColumnInfo(columnName string, columnType string, extra string) (string, 
 		extra = gormSpecificationForDecimals(extra)
 	} else if regexpReference.MatchString(columnType) {
 		columnType = "uint"
-		extra = ""
+		extra = "`gorm:\"index\"`"
 		columnName = columnName + "_ID"
 		isReference = true
 	}
