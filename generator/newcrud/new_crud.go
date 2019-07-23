@@ -1,16 +1,16 @@
 package newcrud
 
 import (
+	"github.com/adilsonchacon/wheel/commons/notify"
+	"github.com/adilsonchacon/wheel/generator/gencommon"
+	"github.com/adilsonchacon/wheel/generator/newauthorize"
+	"github.com/adilsonchacon/wheel/generator/newmigrate"
+	"github.com/adilsonchacon/wheel/generator/newroutes"
+	"github.com/adilsonchacon/wheel/templates/templatecrud"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 	"path/filepath"
 	"strings"
-	"wheel.smart26.com/commons/notify"
-	"wheel.smart26.com/generator/gencommon"
-	"wheel.smart26.com/generator/newauthorize"
-	"wheel.smart26.com/generator/newmigrate"
-	"wheel.smart26.com/generator/newroutes"
-	"wheel.smart26.com/templates/templatecrud"
 )
 
 var entityColumns []gencommon.EntityColumn

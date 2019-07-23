@@ -1,8 +1,8 @@
 package generator
 
 import (
-	"wheel.smart26.com/generator/newapp"
-	"wheel.smart26.com/generator/newcrud"
+	"github.com/adilsonchacon/wheel/generator/newapp"
+	"github.com/adilsonchacon/wheel/generator/newcrud"
 )
 
 func NewApp(options map[string]string) {

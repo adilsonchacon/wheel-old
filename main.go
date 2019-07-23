@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/adilsonchacon/wheel/commons/notify"
+	"github.com/adilsonchacon/wheel/generator"
+	"github.com/adilsonchacon/wheel/help"
+	"github.com/adilsonchacon/wheel/version"
 	"os"
 	"os/exec"
 	"strings"
-	"wheel.smart26.com/commons/notify"
-	"wheel.smart26.com/generator"
-	"wheel.smart26.com/help"
-	"wheel.smart26.com/version"
 )
 
 func IsGoInstalled() bool {

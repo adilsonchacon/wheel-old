@@ -3,6 +3,7 @@ package gencommon
 import (
 	"bufio"
 	"bytes"
+	"github.com/adilsonchacon/wheel/commons/notify"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"math/rand"
@@ -15,7 +16,6 @@ import (
 	"strings"
 	"text/template"
 	"time"
-	"wheel.smart26.com/commons/notify"
 )
 
 type AppConfig struct {
