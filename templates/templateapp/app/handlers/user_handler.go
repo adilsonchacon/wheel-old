@@ -85,8 +85,9 @@ func UserShow(w http.ResponseWriter, r *http.Request) {
 
 func UserList(w http.ResponseWriter, r *http.Request) {
 	var i, page, entries, pages int
-	var userJsons []user.Json
 	var userList []entities.User
+  
+	userJsons := []user.Json{}
 
 	log.Info.Println("Handler: UserList")
 	w.Header().Set("Content-Type", "application/json")

@@ -83,8 +83,9 @@ func {{ .EntityName.CamelCase }}Show(w http.ResponseWriter, r *http.Request) {
 
 func {{ .EntityName.CamelCase }}List(w http.ResponseWriter, r *http.Request) {
 	var i, page, entries, pages int
-	var {{ .EntityName.LowerCamelCase }}Jsons []{{ .EntityName.LowerCase }}.Json
 	var {{ .EntityName.LowerCamelCase }}List []entities.{{ .EntityName.CamelCase }}
+
+	{{ .EntityName.LowerCamelCase }}Jsons := []{{ .EntityName.LowerCase }}.Json{}
 
 	log.Info.Println("Handler: {{ .EntityName.CamelCase }}List")
 	w.Header().Set("Content-Type", "application/json")

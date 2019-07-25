@@ -10,7 +10,7 @@ import (
 
 type PaginationJson struct {
 	Pagination view.MainPagination ` + "`" + `json:"pagination"` + "`" + `
-	{{ .EntityName.CamelCasePlural }} []Json ` + "`" + `json:"{{ .EntityName.SnakeCase }}"` + "`" + `
+	{{ .EntityName.CamelCasePlural }} []Json ` + "`" + `json:"{{ .EntityName.SnakeCasePlural }}"` + "`" + `
 }
 
 type SuccessfullySavedJson struct {

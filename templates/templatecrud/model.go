@@ -17,7 +17,7 @@ func Find(id interface{}) (entities.{{ .EntityName.CamelCase }}, error) {
 	var {{ .EntityName.LowerCamelCase }} entities.{{ .EntityName.CamelCase }}
 	var err error
 
-	model.Db.First(&{{ .EntityName.LowerCamelCase }})
+	model.Db.First(&{{ .EntityName.LowerCamelCase }}, id)
 	if model.Db.NewRecord({{ .EntityName.LowerCamelCase }}) {
 		err = errors.New(NotFound)
 	}
