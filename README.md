@@ -1,13 +1,12 @@
 ## Overview
 
-Wheel should work as a single and executable file. It runs as command line and generates codes (in Go Language) for you to build your RESTful API avoiding rework while building the API architecture and it maintanance. 
-
-Indeed, the architecture generated is MVC. An well known and used pattern by developers around the world. 
+The Wheel framework is a single and executable file. It runs through command line and generates codes (in Go Language) for you to build your RESTful API, avoiding rework while building the API architecture and it maintanance. 
 
 ## Features
 
 - [MVC](http://wheel.unity26.org/features#mvc)
 - [RESTful](http://wheel.unity26.org/features#restful)
+- [JWT](http://wheel.unity26.org/features#jwt)
 - [Session controller](http://wheel.unity26.org/features#session-controller)
 - [Middleware](http://wheel.unity26.org/features#middleware)
 - [Authorization](http://wheel.unity26.org/features#authorization)
@@ -47,7 +46,7 @@ $> sudo mv wheel /usr/bin
 
 __GOPATH__ is where the Go packages and sources are installed
 
-At this example the executable file was moved to _/usr/bin_. But you can set it to any directory you want, just adding to your _.profile_ the following example:
+At this example the executable file was moved to _/usr/bin_. But you can set it to any directory you want, just add the path to your _.profile_, as you see below:
 
 ```
 export PATH=$PATH:YOUR\_DESIRED\_PATH
@@ -67,7 +66,7 @@ wheel --help
 
 ### New Application 
 
-Lets create an API for a Blog
+Let's create an API for a Blog.
 
 ```
 wheel new github.com/account_name/blog
@@ -78,10 +77,10 @@ It will output something like this:
 ```
 "Go" seems installed
 Checking dependences...
-         _..._
+         ...
 Generating new app...
          created: GOPATH/src/github.com/account_name/blog
-         _..._
+         ...
 
 Your App was successfully created!
 
@@ -101,11 +100,11 @@ Remember: __GOPATH__ is where the Go packages and sources are installed
 
 ####  Database
 
-Currently Wheel has support only for Postgresql. Edit _config/database.yml_ and set up your database connection.
+Currently, Wheel has support only for Postgresql. Edit _config/database.yml_ and set up your database connection.
 
 #### Email
 
-To connect to your email provider edit _config/email.yml_ and set up your email credentials.
+To connect to your email provider edit _config/email.yml_ and set up with your send email account.
 
 #### Application
 
