@@ -46,7 +46,7 @@ $> sudo mv wheel /usr/bin
 
 __GOPATH__ is where the Go packages and sources are installed
 
-At this example the executable file was moved to _/usr/bin_. But you can set it to any directory you want, just add the path to your _.profile_, as you see below:
+At this example the executable file was moved to _/usr/bin_. But feel free to set it up to any directory you want. Just add the path to your _.profile_, as you see below:
 
 ```
 export PATH=$PATH:YOUR\_DESIRED\_PATH
@@ -146,7 +146,7 @@ Before continuing, please, check file _db/schema/migrate.go_ and get user's emai
 
 Below is part of full documentation of default resources. See full documentation at http://wheel.unity26.org/default-resources
 
-__POST /sessions/sign\_in___
+__POST /sessions/sign\_in__
 
 | Form param | Description | Mandatory |
 | ------ | ----------- | ----------- |
@@ -179,7 +179,7 @@ On error:
 }
 ```
 
-__DELETE /sessions/sign\_out___
+__DELETE /sessions/sign\_out__
 
 | Header param | Description | Mandatory |
 | ------ | ----------- | ----------- |
@@ -249,3 +249,8 @@ $> go run main.go
 ## Full Documentation
 
 See full documentation at http://wheel.unity26.org/
+
+
+## License
+
+Wheel is released under the [MIT License](https://opensource.org/licenses/MIT).
