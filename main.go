@@ -50,7 +50,7 @@ func CheckDependences() {
 		}
 
 		if !hasDependence {
-			notify.Simple(fmt.Sprintf("package %s was not found, installing...", requiredDependence))
+			notify.Simple(fmt.Sprintf("         package %s was not found, installing...", requiredDependence))
 			cmd := exec.Command("go", "get", requiredDependence)
 			cmd.Stdout = &out
 			err := cmd.Run()
@@ -71,6 +71,7 @@ func handleNewApp(args []string) {
 	options["app_name"] = preOptions[len(preOptions)-1]
 	options["app_repository"] = os.Args[2]
 
+	notify.Simpleln("Generating new app...")
 	generator.NewApp(options)
 }
 
@@ -107,8 +108,6 @@ func buildGenerateOptions(args []string) (map[string]bool, error) {
 		if len(args) < 4 {
 			err = errors.New("invalid model name")
 		}
-	case "handler":
-		options["handler"] = true
 	case "view":
 		options["view"] = true
 	case "entity":
@@ -134,6 +133,7 @@ func handleGenerateNewCrud(args []string, options map[string]bool) {
 		}
 	}
 
+	notify.Simpleln("Generating new CRUD...")
 	generator.NewCrud(args[3], columns, options)
 }
 

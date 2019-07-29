@@ -159,7 +159,7 @@ func SessionRecovery(w http.ResponseWriter, r *http.Request) {
 	log.Info.Println("Handler: SessionRecovery")
 	w.Header().Set("Content-Type", "application/json")
 
-	currentUser, _ := user.FindByResetPasswordToken(r.Header.Get("token"))
+	currentUser, _ := user.FindByResetPasswordToken(r.FormValue("token"))
 	currentUser.Password = r.FormValue("new_password")
 
 	if !user.Exists(&currentUser) {
