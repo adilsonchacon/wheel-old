@@ -116,7 +116,7 @@ func buildGenerateOptions(args []string) (map[string]bool, error) {
 			err = errors.New("invalid entity name")
 		}
 	default:
-		err = errors.New("invalid generate subject")
+		err = errors.New("invalid generate subject. Run \"wheel --help\" for details")
 	}
 
 	return options, err
@@ -155,7 +155,16 @@ func handleVersion() {
 	notify.Simpleln(version.Content)
 }
 
+func checkCommand(args []string) {
+	if (len(args) == 1) || (len(args) > 1 && args[1] != "new" && args[1] != "n" && args[1] != "generate" && args[1] != "g") {
+		notify.ErrorJustified("invalid argument. Use \"new\" or \"generate\". Run \"wheel --help\" for details", 0)
+		handleHelp()
+		notify.Fatal("")
+	}
+}
+
 func main() {
+	checkCommand(os.Args)
 	command := os.Args[1]
 
 	if !IsGoInstalled() {

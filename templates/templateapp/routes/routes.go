@@ -23,6 +23,9 @@ func Routes(host string, port string) *mux.Router {
 	router.Use(authorizeMiddleware)
 
 	log.Info.Println("setting up routes")
+
+	log.Info.Println("listening on " + host + ":" + port + ", CTRL+C to stop")
+
 	// sessions
 	router.HandleFunc("/sessions/sign_in", handlers.SessionSignIn).Methods("POST")
 	router.HandleFunc("/sessions/sign_out", handlers.SessionSignOut).Methods("DELETE")
@@ -43,8 +46,6 @@ func Routes(host string, port string) *mux.Router {
 	router.HandleFunc("/users", handlers.UserCreate).Methods("POST")
 	router.HandleFunc("/users/{id}", handlers.UserUpdate).Methods("PUT")
 	router.HandleFunc("/users/{id}", handlers.UserDestroy).Methods("DELETE")
-
-	log.Info.Println("listening on " + host + ":" + port + ", CTRL+C to stop")
 
 	return router
 }`

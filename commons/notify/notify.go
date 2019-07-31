@@ -89,7 +89,7 @@ func Simpleln(message string) {
 }
 
 func Fatal(message string) {
-	Simple(message)
+	Simpleln(message)
 	os.Exit(0)
 }
 

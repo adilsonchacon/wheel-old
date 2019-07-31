@@ -46,10 +46,10 @@ $> sudo mv wheel /usr/bin
 
 __GOPATH__ is where the Go packages and sources are installed
 
-At this example the executable file was moved to _/usr/bin_. But feel free to set it up to any directory you want. Just add the path to your _.profile_, as you see below:
+The example above, the executable file was moved to _/usr/bin_. But feel free to set it up to any directory you want. Just add the path to your _.profile_, as you see below:
 
 ```
-export PATH=$PATH:YOUR\_DESIRED\_PATH
+export PATH=$PATH:YOUR_DESIRED_PATH
 ```
 
 
@@ -144,7 +144,7 @@ $> go run main.go
 
 Before continuing, please, check file _db/schema/migrate.go_ and get user's email and password.
 
-Below is part of full documentation of default resources. See full documentation at http://wheel.unity26.org/default-resources
+Let's use the resources of _sign_in_ and _sign_out_.
 
 __POST /sessions/sign\_in__
 
@@ -162,7 +162,7 @@ On success:
       "type": "notice",
       "content": "signed in successfully"
   },
-  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9....",
+  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
   "expires": 7200
 }
 ```
@@ -228,7 +228,7 @@ It will output something like this:
 ```
 "Go" seems installed
 Checking dependences...
-         _..._
+         ...
 Generating new CRUD...
          created: app/post/post_model.go
          created: app/post/post_view.go
