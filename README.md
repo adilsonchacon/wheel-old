@@ -93,7 +93,7 @@ For more details call help:
 go run main.go --help
 ```
 
-Remember: __GOPATH__ is where the Go packages and sources are installed
+Remember: __GOPATH__ is where Go packages and sources are installed
 
 
 ### Configure Your API
@@ -128,7 +128,7 @@ Words and phrases for internacionalization. You can add your own locales files, 
 
 ### Running
 
-Before running you should be sure your database schema is up to date, just run the _migrate_ mode:
+Before running you must be sure your database schema is up to date, just run the _migrate_ mode:
 
 ```
 $> go run main.go -mode=migrate
