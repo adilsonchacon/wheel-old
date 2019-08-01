@@ -56,9 +56,9 @@ func CheckDependences() {
 			err := cmd.Run()
 			notify.FatalIfError(err)
 
-			notify.Simpleln(fmt.Sprintf("package %s was successfully installed", requiredDependence))
+			notify.Simpleln(fmt.Sprintf("         package %s was successfully installed", requiredDependence))
 		} else {
-			notify.Simpleln(fmt.Sprintf("package %s was found", requiredDependence))
+			notify.Simpleln(fmt.Sprintf("         package %s was found", requiredDependence))
 		}
 	}
 }

@@ -15,16 +15,16 @@ import (
 func Routes(host string, port string) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.NotFoundHandler = http.HandlerFunc(handler.Error404)
-
 	// middlewares
 	log.Info.Println("setting up middlewares")
 	router.Use(loggingMiddleware)
 	router.Use(authorizeMiddleware)
 
 	log.Info.Println("setting up routes")
-
 	log.Info.Println("listening on " + host + ":" + port + ", CTRL+C to stop")
+
+	router.NotFoundHandler = http.HandlerFunc(handler.Error404)
+	router.HandleFunc("/", handler.ApiRoot).Methods("GET")
 
 	// sessions
 	router.HandleFunc("/sessions/sign_in", handlers.SessionSignIn).Methods("POST")

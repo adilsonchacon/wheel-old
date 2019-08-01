@@ -3,6 +3,7 @@ package gencommon
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"github.com/adilsonchacon/wheel/commons/notify"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -314,7 +315,8 @@ func BuildRootAppPath(appRepository string) string {
 	}
 
 	if DirOrFileExists(path) {
-		notify.Fatal("Sorry, could not create new app. Directory \"" + path + "\" already exists\n")
+		errDirOrFileExists := errors.New("directory \"" + path + "\" already exists\n")
+		notify.FatalIfError(errDirOrFileExists)
 	}
 
 	return path

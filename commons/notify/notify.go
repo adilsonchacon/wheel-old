@@ -121,10 +121,10 @@ func WarnAppendToAuthorize(err error, newCode string) {
 
 func NewApp(rootAppPath string) {
 	fmt.Println("")
-	fmt.Println("Your App was successfully created!")
+	fmt.Println("\033[32mYour RESTful API was successfully created!\033[39m")
 	fmt.Println("")
 	fmt.Println("Change to the root directory using the command line below: ")
-	fmt.Println("cd " + rootAppPath)
+	fmt.Println("\033[32mcd " + rootAppPath + "\033[39m")
 	fmt.Println("")
 	fmt.Println("Set up your database connection modifying the file config/database.yml")
 	fmt.Println("")

@@ -6,7 +6,6 @@ var Content = `package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -15,7 +14,9 @@ import (
 )
 
 func ApiRoot(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "API root")
+	log.Info.Println("handler: ApiRoot")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(view.SetDefaultMessage("notice", "Yeah! Wheel is working!"))
 }
 
 func Error404(w http.ResponseWriter, r *http.Request) {

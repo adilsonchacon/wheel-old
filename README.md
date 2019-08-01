@@ -64,7 +64,7 @@ Check _help_ for more details.
 wheel --help
 ```
 
-### New Application 
+### New API 
 
 Let's create an API for a Blog.
 
@@ -82,7 +82,7 @@ Generating new app...
          created: GOPATH/src/github.com/account_name/blog
          ...
 
-Your App was successfully created!
+Your RESTful API was successfully created!
 
 Change to the root directory using the command line below: 
 cd GOPATH/src/github.com/account_name/blog
@@ -96,7 +96,7 @@ go run main.go --help
 Remember: __GOPATH__ is where the Go packages and sources are installed
 
 
-### Configure 
+### Configure Your API
 
 ####  Database
 
@@ -140,72 +140,15 @@ Run:
 $> go run main.go
 ```
 
-#### Checking
+Now go to http://localhost:8081 and you'll see:
 
-Before continuing, please, check file _db/schema/migrate.go_ and get user's email and password.
-
-Let's use the resources of _sign_in_ and _sign_out_.
-
-__POST /sessions/sign\_in__
-
-| Form param | Description | Mandatory |
-| ------ | ----------- | ----------- |
-| email | User's email | Yes |
-| password | User's password | Yes |
-
-
-On success:
 
 ```
 {
-  "system_message": {
-      "type": "notice",
-      "content": "signed in successfully"
-  },
-  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expires": 7200
-}
-```
-
-On error:
-
-```
-{
-  "system_message": {
-      "type": "alert",
-      "content": "could not sign in"
-  },
-  "errors": ["invalid credentials"]
-}
-```
-
-__DELETE /sessions/sign\_out__
-
-| Header param | Description | Mandatory |
-| ------ | ----------- | ----------- |
-| token | Session token | Yes |
-
-
-On success:
-
-```
-{
-  "system_message": {
-    "type":"notice",
-    "content":"signed out successfully"
+  system_message: {
+    type: "notice",
+    content: "Yeah! Wheel is working!"
   }
-}
-```
-
-On error:
-
-```
-{
-  "system_message": {
-      "type": "alert",
-      "content": "access denied"
-  },
-  "errors": ["invalid token"]
 }
 ```
 
