@@ -6,14 +6,15 @@ var UserContent = `package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"net/http"
 	"{{ .AppRepository }}/app/user"
 	"{{ .AppRepository }}/commons/app/handler"
 	"{{ .AppRepository }}/commons/app/model"
 	"{{ .AppRepository }}/commons/app/view"
 	"{{ .AppRepository }}/commons/log"
 	"{{ .AppRepository }}/db/entities"
+	"github.com/gorilla/mux"
+	"net/http"
+	"regexp"
 )
 
 func UserCreate(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +26,6 @@ func UserCreate(w http.ResponseWriter, r *http.Request) {
 	userSetParams(&newUser, r)
 
 	valid, errs := user.Create(&newUser)
-	log.Debug.Println(errs)
 
 	if valid {
 		json.NewEncoder(w).Encode(user.SuccessfullySavedJson{SystemMessage: view.SetSystemMessage("notice", "user was successfully created"), User: user.SetJson(newUser)})
@@ -93,8 +93,9 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	normalizedParams := handler.NormalizeUrlQueryParams("search", r.URL.Query())
+	order := userSanitizeOrder(r.FormValue("order"))
 
-	userList, page, pages, entries = user.Paginate(normalizedParams, r.FormValue("page"), r.FormValue("per_page"))
+	userList, page, pages, entries = user.Paginate(normalizedParams, order, r.FormValue("page"), r.FormValue("per_page"))
 
 	for i = 0; i < len(userList); i++ {
 		userJsons = append(userJsons, user.SetJson(userList[i]))
@@ -117,4 +118,25 @@ func userSetParams(userSet *entities.User, r *http.Request) {
 			}
 		}
 	}
+}
+
+func userSanitizeOrder(value string) string {
+	var allowedParams = []*regexp.Regexp{
+		regexp.MustCompile(` + "`" + `(?i)\A\s*id(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+		regexp.MustCompile(` + "`" + `(?i)\A\s*name(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+		regexp.MustCompile(` + "`" + `(?i)\A\s*email(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+		regexp.MustCompile(` + "`" + `(?i)\A\s*password(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+		regexp.MustCompile(` + "`" + `(?i)\A\s*admin(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+		regexp.MustCompile(` + "`" + `(?i)\A\s*locale(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+		regexp.MustCompile(` + "`" + `(?i)\A\s*created_at(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+		regexp.MustCompile(` + "`" + `(?i)\A\s*updated_at(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+		regexp.MustCompile(` + "`" + `(?i)\A\s*deleted_at(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `)}
+
+	for _, allowedParam := range allowedParams {
+		if allowedParam.MatchString(value) {
+			return value
+		}
+	}
+
+	return ""
 }`

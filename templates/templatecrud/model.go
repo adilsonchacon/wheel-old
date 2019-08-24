@@ -6,6 +6,7 @@ import (
 	"errors"
 	"{{ .AppRepository }}/commons/app/model"
 	"{{ .AppRepository }}/commons/app/model/pagination"
+	"{{ .AppRepository }}/commons/app/model/searchengine"
 	"{{ .AppRepository }}/db/entities"
 )
 
@@ -104,13 +105,14 @@ func Destroy({{ .EntityName.LowerCamelCase }} *entities.{{ .EntityName.CamelCase
 	}
 }
 
-func Paginate(criteria map[string]string, page interface{}, perPage interface{}) ([]entities.{{ .EntityName.CamelCase }}, int, int, int) {
+func Paginate(criteria map[string]string, order string, page interface{}, perPage interface{}) ([]entities.{{ .EntityName.CamelCase }}, int, int, int) {
 	var {{ .EntityName.LowerCamelCasePlural }} []entities.{{ .EntityName.CamelCase }}
 	var {{ .EntityName.LowerCamelCase }} entities.{{ .EntityName.CamelCase }}
 
-	search, currentPage, totalPages, totalEntries := pagination.Query(&{{ .EntityName.LowerCamelCase }}, criteria, page, perPage)
+	db := searchengine.Query(&{{ .EntityName.LowerCamelCase }}, criteria, order)
+	db, currentPage, totalPages, totalEntries := pagination.Query(db, &{{ .EntityName.LowerCamelCase }}, page, perPage)
 
-	search.Find(&{{ .EntityName.LowerCamelCasePlural }})
+	db.Find(&{{ .EntityName.LowerCamelCasePlural }})
 
 	return {{ .EntityName.LowerCamelCasePlural }}, currentPage, totalPages, totalEntries
 }

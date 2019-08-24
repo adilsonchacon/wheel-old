@@ -1,6 +1,6 @@
 ## Overview
 
-The Wheel framework is a single and executable file. It runs through command line and generates codes (in Go Language) for you to build your RESTful API, avoiding rework while building the API architecture and it maintenance. 
+The Wheel framework is a single and executable file. It runs through command line and generates codes (in Go Language) for you to build RESTful APIs, avoiding rework while building the architecture and its maintenance.
 
 ## Features
 
@@ -55,7 +55,7 @@ export PATH=$PATH:YOUR_DESIRED_PATH
 
 ## Usage
 
-Wheel has basically two options: _new_ to create new APIs and _generate_ to add new functionalities to your API. 
+Wheel has only two options: _new_ to create new APIs and _generate_ to add new functionalities to your API. 
 
 Check _help_ for more details.
 

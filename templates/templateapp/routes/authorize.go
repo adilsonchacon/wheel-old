@@ -39,7 +39,7 @@ func checkItem(currrent string, availables []string) bool {
 func init() {
 	Permissions = append(Permissions,
 		Permission{
-			UrlRegexp: regexp.MustCompile(` + "`" + `(\A\/|^$\z)` + "`" + `),
+			UrlRegexp: regexp.MustCompile(` + "`" + `\A\/{0,1}\z` + "`" + `),
 			Methods:   []string{"GET"},
 			UserRoles: []string{"public", "signed_in", "admin"},
 		})

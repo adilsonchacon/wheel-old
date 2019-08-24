@@ -5,27 +5,24 @@ var Path = []string{"commons", "app", "model", "pagination", "pagination.go"}
 var Content = `package pagination
 
 import (
+	"{{ .AppRepository }}/commons/app/model"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"strconv"
-	"{{ .AppRepository }}/commons/app/model"
-	"{{ .AppRepository }}/commons/app/model/searchengine"
 )
 
 type Counter struct {
 	Entries int
 }
 
-func Query(table interface{}, criteria map[string]string, page interface{}, perPage interface{}) (*gorm.DB, int, int, int) {
+func Query(db *gorm.DB, table interface{}, page interface{}, perPage interface{}) (*gorm.DB, int, int, int) {
 	var currentPage, totalPages, entriesPerPage int
 	var counter Counter
 
 	currentPage = handleCurrentPage(page)
 	entriesPerPage = handleEntriesPerPage(perPage)
 
-	query, values := searchengine.Query(table, criteria, "AND")
-
-	model.Db.Table(model.TableName(table)).Select("COUNT(*) AS entries").Where(query, values...).Scan(&counter)
+	db.Table(model.TableName(table)).Order("", true).Select("COUNT(*) AS entries").Scan(&counter)
 
 	totalPages = counter.Entries / entriesPerPage
 	if (counter.Entries % entriesPerPage) > 0 {
@@ -33,9 +30,9 @@ func Query(table interface{}, criteria map[string]string, page interface{}, perP
 	}
 
 	offset := (currentPage - 1) * entriesPerPage
-	pagination := model.Db.Offset(offset).Limit(entriesPerPage).Where(query, values...)
+	db = db.Offset(offset).Limit(entriesPerPage)
 
-	return pagination, currentPage, totalPages, counter.Entries
+	return db, currentPage, totalPages, counter.Entries
 }
 
 func handleCurrentPage(page interface{}) int {

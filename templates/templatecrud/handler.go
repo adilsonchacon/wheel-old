@@ -4,14 +4,15 @@ var HandlerContent = `package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"net/http"
 	"{{ .AppRepository }}/app/{{ .EntityName.LowerCase }}"
 	"{{ .AppRepository }}/commons/app/handler"
 	"{{ .AppRepository }}/commons/app/model"
 	"{{ .AppRepository }}/commons/app/view"
 	"{{ .AppRepository }}/commons/log"
 	"{{ .AppRepository }}/db/entities"
+	"github.com/gorilla/mux"
+	"net/http"
+	"regexp"
 )
 
 func {{ .EntityName.CamelCase }}Create(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +24,6 @@ func {{ .EntityName.CamelCase }}Create(w http.ResponseWriter, r *http.Request) {
 	{{ .EntityName.LowerCamelCase }}SetParams(&new{{ .EntityName.CamelCase }}, r)
 
 	valid, errs := {{ .EntityName.LowerCase }}.Create(&new{{ .EntityName.CamelCase }})
-	log.Debug.Println(errs)
 
 	if valid {
 		json.NewEncoder(w).Encode({{ .EntityName.LowerCamelCase }}.SuccessfullySavedJson{SystemMessage: view.SetSystemMessage("notice", "{{ .EntityName.SnakeCase }} was successfully created"), {{ .EntityName.CamelCase }}: {{ .EntityName.LowerCamelCase }}.SetJson(new{{ .EntityName.CamelCase }})})
@@ -91,8 +91,9 @@ func {{ .EntityName.CamelCase }}List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	normalizedParams := handler.NormalizeUrlQueryParams("search", r.URL.Query())
+	order := postSanitizeOrder(r.FormValue("order"))
 
-	{{ .EntityName.LowerCamelCase }}List, page, pages, entries = {{ .EntityName.LowerCase }}.Paginate(normalizedParams, r.FormValue("page"), r.FormValue("per_page"))
+	{{ .EntityName.LowerCamelCase }}List, page, pages, entries = {{ .EntityName.LowerCase }}.Paginate(normalizedParams, order, r.FormValue("page"), r.FormValue("per_page"))
 
 	for i = 0; i < len({{ .EntityName.LowerCamelCase }}List); i++ {
 		{{ .EntityName.LowerCamelCase }}Jsons = append({{ .EntityName.LowerCamelCase }}Jsons, {{ .EntityName.LowerCase }}.SetJson({{ .EntityName.LowerCamelCase }}List[i]))
@@ -116,4 +117,22 @@ func {{ .EntityName.LowerCamelCase }}SetParams({{ .EntityName.LowerCamelCase }}S
 			}
 		}
 	}
+}
+
+func {{ .EntityName.LowerCamelCase }}SanitizeOrder(value string) string {
+	var allowedParams = []*regexp.Regexp{
+    regexp.MustCompile(` + "`" + `(?i)\A\s*id(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+    {{- $filteredEntityColumns := filterEntityColumnsNotForeignKeys .EntityColumns }}
+  	{{- range $index, $element := $filteredEntityColumns }} 
+    regexp.MustCompile(` + "`" + `(?i)\A\s*{{ $element.NameSnakeCase }}(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `), {{- end }}
+    regexp.MustCompile(` + "`" + `(?i)\A\s*created_at(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `),
+    regexp.MustCompile(` + "`" + `(?i)\A\s*updated_at(\s+(DESC|ASC)){0,1}\s*\z` + "`" + `)}
+
+	for _, allowedParam := range allowedParams {
+		if allowedParam.MatchString(value) {
+			return value
+		}
+	}
+
+	return ""
 }`

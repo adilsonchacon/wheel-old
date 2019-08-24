@@ -174,13 +174,14 @@ func FindByResetPasswordToken(token string) (entities.User, error) {
 	return user, err
 }
 
-func Paginate(criteria map[string]string, page interface{}, perPage interface{}) ([]entities.User, int, int, int) {
+func Paginate(criteria map[string]string, order string, page interface{}, perPage interface{}) ([]entities.User, int, int, int) {
 	var users []entities.User
 	var user entities.User
 
-	search, currentPage, totalPages, totalEntries := pagination.Query(&user, criteria, page, perPage)
+	db := searchengine.Query(&user, criteria, order)
+	db, currentPage, totalPages, totalEntries := pagination.Query(db, &user, page, perPage)
 
-	search.Order("name").Find(&users, "deleted_at IS NULL")
+	db.Find(&users, "deleted_at IS NULL")
 
 	return users, currentPage, totalPages, totalEntries
 }

@@ -5,16 +5,28 @@ var Path = []string{"commons", "app", "model", "searchengine", "searchengine.go"
 var Content = `package searchengine
 
 import (
+	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/log"
+  "github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"{{ .AppRepository }}/commons/app/model"
-	"{{ .AppRepository }}/commons/log"
 )
 
-func Query(table interface{}, criteria map[string]string, logic string) (string, []interface{}) {
+func Query(table interface{}, criteria map[string]string, order string) *gorm.DB {
+	query, values := Criteria(table, criteria, "AND")
+
+	db := model.Db.Where(query, values...)
+	if order != "" {
+		db = db.Order(order)
+	}
+
+	return db
+}
+
+func Criteria(table interface{}, criteria map[string]string, logic string) (string, []interface{}) {
 	var queries []string
 	var values []interface{}
 	var query string
