@@ -90,10 +90,10 @@ func {{ .EntityName.CamelCase }}List(w http.ResponseWriter, r *http.Request) {
 	log.Info.Println("Handler: {{ .EntityName.CamelCase }}List")
 	w.Header().Set("Content-Type", "application/json")
 
-	normalizedParams := handler.NormalizeUrlQueryParams("search", r.URL.Query())
-	order := postSanitizeOrder(r.FormValue("order"))
+	criteria := handler.QueryParamsToMapCriteria("search", r.URL.Query())
+	order := {{ .EntityName.LowerCamelCase }}SanitizeOrder(r.FormValue("order"))
 
-	{{ .EntityName.LowerCamelCase }}List, page, pages, entries = {{ .EntityName.LowerCase }}.Paginate(normalizedParams, order, r.FormValue("page"), r.FormValue("per_page"))
+	{{ .EntityName.LowerCamelCase }}List, page, pages, entries = {{ .EntityName.LowerCase }}.Paginate(criteria, order, r.FormValue("page"), r.FormValue("per_page"))
 
 	for i = 0; i < len({{ .EntityName.LowerCamelCase }}List); i++ {
 		{{ .EntityName.LowerCamelCase }}Jsons = append({{ .EntityName.LowerCamelCase }}Jsons, {{ .EntityName.LowerCase }}.SetJson({{ .EntityName.LowerCamelCase }}List[i]))

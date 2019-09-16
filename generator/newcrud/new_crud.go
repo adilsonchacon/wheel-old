@@ -62,8 +62,16 @@ func setMigrate() {
 	}
 }
 
-func setRoutes() {
-	newCode := gencommon.GenerateRoutesNewCode(templatecrud.RoutesContent, templateVar)
+func setRoutes(options map[string]bool) {
+	var newCode string
+
+	if isCustomHandler(options) {
+		newCode = gencommon.GenerateRoutesNewCode(templatecrud.CustomRoutesContent, templateVar)
+		newCode = strings.TrimSpace(newCode)
+	} else {
+		newCode = gencommon.GenerateRoutesNewCode(templatecrud.RoutesContent, templateVar)
+	}
+
 	currentFullCode := gencommon.ReadTextFile(filepath.Join(".", "routes"), "routes.go")
 	newFullCode, err := newroutes.AppendNewCode(newCode, currentFullCode)
 
@@ -76,8 +84,15 @@ func setRoutes() {
 	}
 }
 
-func setAuthorize() {
-	newCode := gencommon.GenerateAuthorizeNewCode(templatecrud.AuthorizeContent, templateVar)
+func setAuthorize(options map[string]bool) {
+	var newCode string
+
+	if isCustomHandler(options) {
+		newCode = gencommon.GenerateAuthorizeNewCode(templatecrud.CustomAuthorizeContent, templateVar)
+	} else {
+		newCode = gencommon.GenerateAuthorizeNewCode(templatecrud.AuthorizeContent, templateVar)
+	}
+
 	currentFullCode := gencommon.ReadTextFile(filepath.Join(".", "routes"), "authorize.go")
 	newFullCode, err := newauthorize.AppendNewCode(newCode, currentFullCode)
 
@@ -88,6 +103,19 @@ func setAuthorize() {
 	} else {
 		gencommon.UpdateTextFile(newFullCode, filepath.Join(".", "routes"), "authorize.go")
 	}
+}
+
+func isCustomHandler(options map[string]bool) bool {
+	var counter int
+	counter = 0
+
+	for _, value := range options {
+		if value {
+			counter++
+		}
+	}
+
+	return counter == 3 && options["handler"] && options["routes"] && options["authorize"]
 }
 
 func Generate(entityName string, columns []string, options map[string]bool) {
@@ -130,11 +158,15 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 
 	if options["handler"] {
 		path = []string{".", "app", "handlers", tEntityName.SnakeCase + "_handler.go"}
-		gencommon.GeneratePathAndFileFromTemplateString(path, templatecrud.HandlerContent, templateVar)
+		if isCustomHandler(options) {
+			gencommon.GeneratePathAndFileFromTemplateString(path, templatecrud.CustomHandlerContent, templateVar)
+		} else {
+			gencommon.GeneratePathAndFileFromTemplateString(path, templatecrud.HandlerContent, templateVar)
+		}
 	}
 
 	if options["routes"] {
-		setRoutes()
+		setRoutes(options)
 	}
 
 	if options["migrate"] {
@@ -142,7 +174,7 @@ func Generate(entityName string, columns []string, options map[string]bool) {
 	}
 
 	if options["authorize"] {
-		setAuthorize()
+		setAuthorize(options)
 	}
 
 }

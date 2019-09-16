@@ -35,7 +35,7 @@ func SetDefaultMessage(mType string, content string) DefaultMessage {
 }
 
 func SetErrorMessage(mType string, content string, errs []error) ErrorMessage {
-	var stringErrors []string
+	stringErrors := []string{}
 
 	for _, value := range errs {
 		stringErrors = append(stringErrors, value.Error())
@@ -44,7 +44,6 @@ func SetErrorMessage(mType string, content string, errs []error) ErrorMessage {
 	return ErrorMessage{Message: SetSystemMessage(mType, content), Errors: stringErrors}
 }
 
-func SetNotFoundErrorMessage() ErrorMessage {
-	var errs []error
-	return SetErrorMessage("alert", "404 not found", errs)
+func SetNotFoundErrorMessage() DefaultMessage {
+	return SetDefaultMessage("alert", "404 not found")
 }`

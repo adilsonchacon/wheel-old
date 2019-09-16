@@ -105,13 +105,17 @@ func buildGenerateOptions(args []string) (map[string]bool, error) {
 	case "model":
 		options["model"] = true
 		options["entity"] = true
+		options["migrate"] = true
 		if len(args) < 4 {
 			err = errors.New("invalid model name")
 		}
-	case "view":
-		options["view"] = true
+	case "handler":
+		options["handler"] = true
+		options["routes"] = true
+		options["authorize"] = true
 	case "entity":
 		options["entity"] = true
+		options["migrate"] = true
 		if len(args) < 4 {
 			err = errors.New("invalid entity name")
 		}
@@ -155,32 +159,35 @@ func handleVersion() {
 	notify.Simpleln(version.Content)
 }
 
-func checkCommand(args []string) {
-	if (len(args) == 1) || (len(args) > 1 && args[1] != "new" && args[1] != "n" && args[1] != "generate" && args[1] != "g") {
-		notify.ErrorJustified("invalid argument. Use \"new\" or \"generate\". Run \"wheel --help\" for details", 0)
-		handleHelp()
-		notify.Fatal("")
-	}
-}
-
-func main() {
-	checkCommand(os.Args)
-	command := os.Args[1]
-
+func checkIsGoInstalled() {
 	if !IsGoInstalled() {
 		notify.FatalIfError(errors.New("\"Go\" seems not installed"))
 	} else {
 		notify.Simpleln("\"Go\" seems installed")
 		CheckDependences()
 	}
+}
+
+func main() {
+	command := ""
+
+	if len(os.Args) >= 2 {
+		command = os.Args[1]
+	}
 
 	if command == "new" || command == "n" {
+		checkIsGoInstalled()
 		handleNewApp(os.Args)
 	} else if command == "generate" || command == "g" {
+		checkIsGoInstalled()
 		handleGenerate(os.Args)
 	} else if command == "--help" || command == "-h" {
 		handleHelp()
 	} else if command == "--version" || command == "-v" {
 		handleVersion()
+	} else {
+		notify.ErrorJustified("invalid argument. Use \"new\" or \"generate\". Run \"wheel --help\" for details", 0)
+		handleHelp()
+		notify.Fatal("")
 	}
 }

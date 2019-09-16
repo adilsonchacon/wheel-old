@@ -16,17 +16,17 @@ import (
 func ApiRoot(w http.ResponseWriter, r *http.Request) {
 	log.Info.Println("handler: ApiRoot")
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(view.SetDefaultMessage("notice", "Yeah! Wheel is working!"))
+	json.NewEncoder(w).Encode(view.SetDefaultMessage("notice", "Yeah! Your API is working!"))
 }
 
 func Error404(w http.ResponseWriter, r *http.Request) {
-	log.Info.Println("handler: Error404")
+	log.Info.Println("Handler: Error404")
 	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(view.SetNotFoundErrorMessage())
 }
 
-func NormalizeUrlQueryParams(param string, mapParams map[string][]string) map[string]string {
+func QueryParamsToMapCriteria(param string, mapParams map[string][]string) map[string]string {
 	var criteria, value string
 	var checkParam, removePrefix, removeSufix *regexp.Regexp
 	var err error

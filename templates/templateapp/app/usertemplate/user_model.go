@@ -11,6 +11,7 @@ import (
 	"time"
 	"{{ .AppRepository }}/commons/app/model"
 	"{{ .AppRepository }}/commons/app/model/pagination"
+	"{{ .AppRepository }}/commons/app/model/searchengine"
 	"{{ .AppRepository }}/commons/crypto"
 	"{{ .AppRepository }}/config"
 	"{{ .AppRepository }}/db/entities"

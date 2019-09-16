@@ -38,7 +38,7 @@ func Routes(host string, port string) *mux.Router {
 	router.HandleFunc("/myself", handlers.MyselfShow).Methods("GET")
 	router.HandleFunc("/myself", handlers.MyselfUpdate).Methods("PUT")
 	router.HandleFunc("/myself/password", handlers.MyselfUpdatePassword).Methods("PUT")
-	router.HandleFunc("/myself/destroy", handlers.MyselfDestroy).Methods("DELETE")
+	router.HandleFunc("/myself", handlers.MyselfDestroy).Methods("DELETE")
 
 	// admin
 	router.HandleFunc("/users", handlers.UserList).Methods("GET")
