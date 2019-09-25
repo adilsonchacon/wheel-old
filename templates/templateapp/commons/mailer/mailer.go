@@ -76,7 +76,7 @@ func ResetAll() {
 func Send(subject string, body string, html bool) {
 	receipts := Reciepts()
 	headers := make(map[string]string)
-	config := LoadConfigFile()
+	config := loadConfigFile()
 
 	if from.String() == "<@>" {
 		from = mail.Address{config.Name, config.User}
@@ -86,15 +86,15 @@ func Send(subject string, body string, html bool) {
 	headers["From"] = from.String()
 
 	if len(to) > 0 {
-		headers["To"] = Stringfy("to")
+		headers["To"] = stringfy("to")
 	}
 
 	if len(cc) > 0 {
-		headers["Cc"] = Stringfy("cc")
+		headers["Cc"] = stringfy("cc")
 	}
 
 	if len(bcc) > 0 {
-		headers["Bcc"] = Stringfy("bcc")
+		headers["Bcc"] = stringfy("bcc")
 	}
 
 	if html {
@@ -170,7 +170,7 @@ func Send(subject string, body string, html bool) {
 	client.Quit()
 }
 
-func Stringfy(tType string) string {
+func stringfy(tType string) string {
 	var isTo = regexp.MustCompile(` + "`" + `(?i)\Ato\z` + "`" + `)
 	var isCc = regexp.MustCompile(` + "`" + `(?i)\Acc\z` + "`" + `)
 	var isBcc = regexp.MustCompile(` + "`" + `(?i)\Abcc\z` + "`" + `)
@@ -187,7 +187,7 @@ func Stringfy(tType string) string {
 	} else if isFrom.MatchString(tType) {
 		auxEmail = append(auxEmail, from)
 	} else {
-		log.Error.Println("Invalid param for Stringfy, available params are to, cc, bcc and from")
+		log.Error.Println("Invalid param for stringfy, available params are to, cc, bcc and from")
 	}
 
 	for i := 0; i < len(auxEmail); i++ {
@@ -215,10 +215,10 @@ func Reciepts() []string {
 	return reciepts
 }
 
-func LoadConfigFile() Config {
+func loadConfigFile() Config {
 	config := Config{}
 
-	err := yaml.Unmarshal(ReadConfigFile(), &config)
+	err := yaml.Unmarshal(readConfigFile(), &config)
 	if err != nil {
 		log.Error.Fatalf("error: %v", err)
 	}
@@ -226,7 +226,7 @@ func LoadConfigFile() Config {
 	return config
 }
 
-func ReadConfigFile() []byte {
+func readConfigFile() []byte {
 	data, err := ioutil.ReadFile("./config/email.yml")
 	if err != nil {
 		log.Error.Fatal(err)

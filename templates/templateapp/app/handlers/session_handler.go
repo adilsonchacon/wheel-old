@@ -36,7 +36,7 @@ const (
 )
 
 func SessionSignIn(w http.ResponseWriter, r *http.Request) {
-	log.Info.Println("Handler: SessionSingIn")
+	log.Info.Println("Handler: SessionSignIn")
 	w.Header().Set("Content-Type", "application/json")
 
 	userAuth, err := user.Authenticate(r.FormValue("email"), r.FormValue("password"))
@@ -60,13 +60,13 @@ func SessionSignOut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionSingOut, errorFindByJti := session.FindByJti(claims.Jti)
+	sessionSignOut, errorFindByJti := session.FindByJti(claims.Jti)
 	if errorFindByJti != nil {
 		json.NewEncoder(w).Encode(view.SetErrorMessage("alert", "access denied", []error{errors.New("invalid token")}))
 		return
 	}
 
-	if deactivated, _ := session.Deactivate(&sessionSingOut); deactivated {
+	if deactivated, _ := session.Deactivate(&sessionSignOut); deactivated {
 		json.NewEncoder(w).Encode(session.SignOutSuccessMessage("notice", "signed out successfully"))
 	} else {
 		json.NewEncoder(w).Encode(view.SetErrorMessage("alert", "access denied", []error{errors.New("invalid token")}))
