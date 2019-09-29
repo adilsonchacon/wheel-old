@@ -10,6 +10,7 @@ import (
 	"github.com/adilsonchacon/wheel/templates/templateapp/app/usertemplate"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/handler"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/model"
+	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/model/ordering"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/model/pagination"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/model/searchengine"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/view"
@@ -67,6 +68,7 @@ func Generate(options map[string]string) {
 	// COMMONS APPs
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(handler.Path), handler.Content, templateVar)
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(model.Path), model.Content, templateVar)
+	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(ordering.Path), ordering.Content, templateVar)
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(pagination.Path), pagination.Content, templateVar)
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(searchengine.Path), searchengine.Content, templateVar)
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(view.Path), view.Content, templateVar)

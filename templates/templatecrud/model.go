@@ -5,6 +5,7 @@ var ModelContent = `package {{ .EntityName.LowerCase }}
 import (
 	"errors"
 	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/app/model/ordering"
 	"{{ .AppRepository }}/commons/app/model/pagination"
 	"{{ .AppRepository }}/commons/app/model/searchengine"
 	"{{ .AppRepository }}/db/entities"
@@ -109,7 +110,8 @@ func Paginate(criteria map[string]string, order string, page interface{}, perPag
 	var {{ .EntityName.LowerCamelCasePlural }} []entities.{{ .EntityName.CamelCase }}
 	var {{ .EntityName.LowerCamelCase }} entities.{{ .EntityName.CamelCase }}
 
-	db := searchengine.Query(&{{ .EntityName.LowerCamelCase }}, criteria, order)
+	db := searchengine.Query(&{{ .EntityName.LowerCamelCase }}, criteria)
+	db = ordering.Query(db, order)
 	db, currentPage, totalPages, totalEntries := pagination.Query(db, &{{ .EntityName.LowerCamelCase }}, page, perPage)
 
 	db.Find(&{{ .EntityName.LowerCamelCasePlural }})

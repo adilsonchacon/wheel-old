@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"{{ .AppRepository }}/commons/app/model"
+	"{{ .AppRepository }}/commons/app/model/ordering"
 	"{{ .AppRepository }}/commons/app/model/pagination"
 	"{{ .AppRepository }}/commons/app/model/searchengine"
 	"{{ .AppRepository }}/commons/crypto"
@@ -179,7 +180,8 @@ func Paginate(criteria map[string]string, order string, page interface{}, perPag
 	var users []entities.User
 	var user entities.User
 
-	db := searchengine.Query(&user, criteria, order)
+	db := searchengine.Query(&user, criteria)
+	db = ordering.Query(db, order)
 	db, currentPage, totalPages, totalEntries := pagination.Query(db, &user, page, perPage)
 
 	db.Find(&users, "deleted_at IS NULL")

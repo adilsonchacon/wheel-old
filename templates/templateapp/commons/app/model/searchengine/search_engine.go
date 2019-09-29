@@ -14,13 +14,8 @@ import (
 	"time"
 )
 
-func Query(table interface{}, criteria map[string]string, order string) *gorm.DB {
+func Query(table interface{}, criteria map[string]string) *gorm.DB {
 	query, values := Criteria(table, criteria, "AND")
-
-	db := model.Db.Where(query, values...)
-	if order != "" {
-		db = db.Order(order)
-	}
 
 	return db
 }
