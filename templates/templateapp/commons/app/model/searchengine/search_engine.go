@@ -17,6 +17,8 @@ import (
 func Query(table interface{}, criteria map[string]string) *gorm.DB {
 	query, values := Criteria(table, criteria, "AND")
 
+	db := model.Db.Where(query, values...)
+
 	return db
 }
 

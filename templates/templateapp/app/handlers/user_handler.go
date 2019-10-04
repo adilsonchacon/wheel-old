@@ -92,10 +92,10 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 	log.Info.Println("Handler: UserList")
 	w.Header().Set("Content-Type", "application/json")
 
-	normalizedParams := handler.NormalizeUrlQueryParams("search", r.URL.Query())
+	criteria := handler.QueryParamsToMapCriteria("search", r.URL.Query())
 	order := userSanitizeOrder(r.FormValue("order"))
 
-	userList, page, pages, entries = user.Paginate(normalizedParams, order, r.FormValue("page"), r.FormValue("per_page"))
+	userList, page, pages, entries = user.Paginate(criteria, order, r.FormValue("page"), r.FormValue("per_page"))
 
 	for i = 0; i < len(userList); i++ {
 		userJsons = append(userJsons, user.SetJson(userList[i]))

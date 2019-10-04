@@ -26,7 +26,7 @@ func {{ .EntityName.CamelCase }}Create(w http.ResponseWriter, r *http.Request) {
 	valid, errs := {{ .EntityName.LowerCase }}.Create(&new{{ .EntityName.CamelCase }})
 
 	if valid {
-		json.NewEncoder(w).Encode({{ .EntityName.LowerCamelCase }}.SuccessfullySavedJson{SystemMessage: view.SetSystemMessage("notice", "{{ .EntityName.SnakeCase }} was successfully created"), {{ .EntityName.CamelCase }}: {{ .EntityName.LowerCamelCase }}.SetJson(new{{ .EntityName.CamelCase }})})
+		json.NewEncoder(w).Encode({{ .EntityName.LowerCase }}.SuccessfullySavedJson{SystemMessage: view.SetSystemMessage("notice", "{{ .EntityName.SnakeCase }} was successfully created"), {{ .EntityName.CamelCase }}: {{ .EntityName.LowerCase }}.SetJson(new{{ .EntityName.CamelCase }})})
 	} else {
 		json.NewEncoder(w).Encode(view.SetErrorMessage("alert", "{{ .EntityName.SnakeCase }} was not created", errs))
 	}
