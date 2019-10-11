@@ -51,9 +51,10 @@ func authorizeMiddleware(next http.Handler) http.Handler {
 
 		if GrantPermission(r.RequestURI, r.Method, userRole) {
 			next.ServeHTTP(w, r)
+		} else if userRole == "public" {
+			handler.Error401(w, r)
 		} else {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(view.SetNotFoundErrorMessage())
+			handler.Error403(w, r)
 		}
 	})
 }

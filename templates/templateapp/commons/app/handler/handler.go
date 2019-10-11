@@ -19,6 +19,22 @@ func ApiRoot(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(view.SetDefaultMessage("notice", "Yeah! Your API is working!"))
 }
 
+func Error401(w http.ResponseWriter, r *http.Request) {
+	log.Info.Println("Handler: Error401")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	json.NewEncoder(w).Encode(view.SetUnauthorizedErrorMessage())
+}
+
+func Error403(w http.ResponseWriter, r *http.Request) {
+	log.Info.Println("Handler: Error403")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	json.NewEncoder(w).Encode(view.SetForbiddenErrorMessage())
+}
+
 func Error404(w http.ResponseWriter, r *http.Request) {
 	log.Info.Println("Handler: Error404")
 	w.Header().Set("Content-Type", "application/json")

@@ -44,6 +44,14 @@ func SetErrorMessage(mType string, content string, errs []error) ErrorMessage {
 	return ErrorMessage{Message: SetSystemMessage(mType, content), Errors: stringErrors}
 }
 
+func SetUnauthorizedErrorMessage() DefaultMessage {
+	return SetDefaultMessage("alert", "401 Unauthorized")
+}
+
+func SetForbiddenErrorMessage() DefaultMessage {
+	return SetDefaultMessage("alert", "403 Forbidden")
+}
+
 func SetNotFoundErrorMessage() DefaultMessage {
-	return SetDefaultMessage("alert", "404 not found")
+	return SetDefaultMessage("alert", "404 Not found")
 }`
