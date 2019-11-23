@@ -66,7 +66,7 @@ func AddBcc(name string, tEmail string) {
 	}
 }
 
-func ResetAll() {
+func ResetReceipts() {
 	SetFrom("", "")
 	to = to[:0]
 	cc = cc[:0]
@@ -74,7 +74,7 @@ func ResetAll() {
 }
 
 func Send(subject string, body string, html bool) {
-	receipts := Reciepts()
+	receipts := Receipts()
 	headers := make(map[string]string)
 	config := loadConfigFile()
 
@@ -197,22 +197,22 @@ func stringfy(tType string) string {
 	return strings.Join(auxString, "; ")
 }
 
-func Reciepts() []string {
-	var reciepts []string
+func Receipts() []string {
+	var receipts []string
 
 	for i := 0; i < len(to); i++ {
-		reciepts = append(reciepts, to[0].Address)
+		receipts = append(receipts, to[0].Address)
 	}
 
 	for i := 0; i < len(cc); i++ {
-		reciepts = append(reciepts, cc[0].Address)
+		receipts = append(receipts, cc[0].Address)
 	}
 
 	for i := 0; i < len(bcc); i++ {
-		reciepts = append(reciepts, bcc[0].Address)
+		receipts = append(receipts, bcc[0].Address)
 	}
 
-	return reciepts
+	return receipts
 }
 
 func loadConfigFile() Config {

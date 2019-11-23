@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"github.com/adilsonchacon/wheel/commons/diff"
+	"github.com/adilsonchacon/wheel/commons/fileutil"
 	"github.com/adilsonchacon/wheel/commons/notify"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -88,6 +90,8 @@ func persistFile(content string, filePath string, fileName string, pseudoMode st
 
 	f.Sync()
 
+	fileutil.GoFmtFile(fullPath)
+
 	switch pseudoMode {
 	case "w":
 		notify.Created(fullPath)
@@ -103,30 +107,38 @@ func persistFile(content string, filePath string, fileName string, pseudoMode st
 
 }
 
-func ReadBytesFile(filePath string, fileName string) []byte {
-	file, err := os.Open(filepath.Join(filePath, fileName))
-	notify.FatalIfError(err)
-
-	defer file.Close()
-
-	b, err := ioutil.ReadAll(file)
-
-	return b
-}
-
-func ReadTextFile(filePath string, fileName string) string {
-	return string(ReadBytesFile(filePath, fileName))
-}
-
 func DestroyDirOrFile(fullPath string) {
 	err := os.Remove(fullPath)
 	notify.FatalIfError(err)
 }
 
+func FmtNewContent(content string) string {
+	var fileName string
+
+	tmpfile, err := ioutil.TempFile("", "wheel-new-content*.go")
+	notify.FatalIfError(err)
+
+	fileName = strings.TrimPrefix(tmpfile.Name(), os.TempDir())
+	fileName = strings.TrimPrefix(fileName, `/`)
+	fileName = strings.TrimPrefix(fileName, `\`)
+
+	defer os.Remove(tmpfile.Name())
+
+	_, err = tmpfile.WriteString(content)
+	notify.FatalIfError(err)
+
+	err = tmpfile.Close()
+	notify.FatalIfError(err)
+
+	fileutil.GoFmtFile(tmpfile.Name())
+
+	return fileutil.ReadTextFile(os.TempDir(), fileName)
+}
+
 func GetAppConfig() AppConfig {
 	var appConfig AppConfig
 
-	err := yaml.Unmarshal(ReadBytesFile(filepath.Join(".", "config"), "app.yml"), &appConfig)
+	err := yaml.Unmarshal(fileutil.ReadBytesFile(filepath.Join(".", "config"), "app.yml"), &appConfig)
 	notify.FatalIfError(err)
 
 	return appConfig
@@ -183,8 +195,10 @@ func GenerateFromTemplateFile(templatePath string, templateVar TemplateVar) stri
 	return content.String()
 }
 
-func overwriteFile(fullPath string) string {
+func overwriteFile(content string, filePath string, fileName string) string {
 	var pseudoMode string
+
+	fullPath := filepath.Join(filePath, fileName)
 
 	if yesToAll {
 		return "f"
@@ -193,7 +207,7 @@ func overwriteFile(fullPath string) string {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		notify.Simple("Overwrite " + fullPath + "? (enter \"h\" for help) [Ynaqdhm] ")
+		notify.Simple("Overwrite " + fullPath + "? (enter \"h\" for help) [Ynaqdph] ")
 		text, _ := reader.ReadString('\n')
 		text = strings.Replace(text, "\n", "", -1)
 
@@ -207,12 +221,17 @@ func overwriteFile(fullPath string) string {
 			pseudoMode = "f"
 		case "q":
 			notify.Fatal("Aborting...")
+		case "d":
+			diff.Print(content, filePath, fileName)
+		case "p":
+			diff.Patch(content, filePath, fileName)
+			pseudoMode = "p"
 		default:
 			notify.Simple(overwriteFileHelp())
 			pseudoMode = ""
 		}
 
-		if pseudoMode == "f" || pseudoMode == "s" {
+		if pseudoMode == "f" || pseudoMode == "s" || pseudoMode == "p" {
 			break
 		}
 	}
@@ -227,8 +246,8 @@ func overwriteFileHelp() string {
         a - all, overwrite this and all others
         q - quit, abort
         d - diff, show the differences between the old and the new
+        p - patch, apply patch (check "diff" first)
         h - help, show this help
-        m - merge, run merge tool
 
 `
 }
@@ -242,15 +261,17 @@ func GeneratePathAndFileFromTemplateString(path []string, content string, templa
 	content = GenerateFromTemplateString(content, templateVar)
 
 	if DirOrFileExists(fullPath) {
-		if content == ReadTextFile(filePath, fileName) {
+		if FmtNewContent(content) == fileutil.ReadTextFile(filePath, fileName) {
 			pseudoMode = "i"
 		} else {
-			pseudoMode = overwriteFile(fullPath)
+			pseudoMode = overwriteFile(content, filePath, fileName)
 		}
 	}
 
 	if pseudoMode == "s" {
 		notify.Skip(fullPath)
+	} else if pseudoMode == "p" {
+		notify.Patch(fullPath)
 	} else {
 		persistFile(content, filePath, fileName, pseudoMode)
 	}

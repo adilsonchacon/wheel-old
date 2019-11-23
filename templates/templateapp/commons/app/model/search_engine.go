@@ -1,25 +1,21 @@
-package searchengine
+package model
 
-var Path = []string{"commons", "app", "model", "searchengine", "searchengine.go"}
+var SearchEnginePath = []string{"commons", "app", "model", "searchengine.go"}
 
-var Content = `package searchengine
+var SearchEngineContent = `package model
 
 import (
-	"{{ .AppRepository }}/commons/app/model"
-	"{{ .AppRepository }}/commons/log"
-  "github.com/jinzhu/gorm"
+	"github.com/adilsonchacon/catalog/commons/log"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func Query(table interface{}, criteria map[string]string) *gorm.DB {
-	query, values := Criteria(table, criteria, "AND")
+func (q *Query) SearchEngine(criteria map[string]string) {
+	query, values := Criteria(q.Table, criteria, "AND")
 
-	db := model.Db.Where(query, values...)
-
-	return db
+	q.Db = q.Db.Where(query, values...)
 }
 
 func Criteria(table interface{}, criteria map[string]string, logic string) (string, []interface{}) {
@@ -60,7 +56,7 @@ func handleCriterion(table interface{}, key string, value string) (string, inter
 
 	column, query = strings.Join(names[:len(names)-1], "_"), names[len(names)-1]
 
-	columnType, err = model.GetColumnType(table, column)
+	columnType, err = GetColumnType(table, column)
 	if err != nil {
 		log.Error.Println("SearchEngine handleCriterion", err)
 		return "", "", err

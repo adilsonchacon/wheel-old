@@ -63,13 +63,45 @@ func CheckDependences() {
 	}
 }
 
+func optionsAreValid(args []string) bool {
+	b := true
+
+	for index, value := range args {
+		if (index > 2) && (value != "-G" && value != "--skip-git") {
+			b = false
+			break
+		}
+	}
+
+	return b
+}
+
+func checkGitIgnore(args []string) bool {
+	b := true
+
+	for index, value := range args {
+		if index > 2 && value == "-G" || value == "--skip-git" {
+			b = false
+			break
+		}
+	}
+
+	return b
+}
+
 func handleNewApp(args []string) {
-	var options = make(map[string]string)
+	var options = make(map[string]interface{})
+
+	if !optionsAreValid(args) {
+		err := errors.New("invalid option. Run \"wheel --help\" for details")
+		notify.FatalIfError(err)
+	}
 
 	preOptions := strings.Split(os.Args[2], "/")
 
 	options["app_name"] = preOptions[len(preOptions)-1]
 	options["app_repository"] = os.Args[2]
+	options["git_ignore"] = checkGitIgnore(os.Args)
 
 	notify.Simpleln("Generating new app...")
 	generator.NewApp(options)

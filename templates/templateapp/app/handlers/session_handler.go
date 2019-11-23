@@ -123,7 +123,7 @@ func SessionSignUp(w http.ResponseWriter, r *http.Request) {
 		locale.Load(newUser.Locale)
 
 		mailer.AddTo(newUser.Name, newUser.Email)
-		subject := locale.Welcome() + " " + user.FirstName(&newUser)
+		subject := locale.I18n.Welcome + " " + user.FirstName(&newUser)
 		body := session.SignUpMailer(&newUser)
 		go mailer.Send(subject, body, true)
 
@@ -144,7 +144,7 @@ func SessionPassword(w http.ResponseWriter, r *http.Request) {
 
 		token, _ := user.SetRecovery(&currentUser)
 		mailer.AddTo(currentUser.Name, currentUser.Email)
-		subject := locale.PasswordRecoveryInstructions()
+		subject := locale.I18n.PasswordRecoveryInstructions
 		body := session.PasswordRecoveryInstructionsMailer(&currentUser, token)
 		go mailer.Send(subject, body, true)
 	}

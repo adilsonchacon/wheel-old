@@ -46,6 +46,10 @@ func Warn(message string) {
 	GenericColorful("warn", message, 93, 15)
 }
 
+func Patch(message string) {
+	GenericColorful("patch", message, 35, 15)
+}
+
 func ErrorJustified(err interface{}, leftJustify int) {
 	var message string
 

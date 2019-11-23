@@ -5,7 +5,7 @@ import (
 	"github.com/adilsonchacon/wheel/generator/newcrud"
 )
 
-func NewApp(options map[string]string) {
+func NewApp(options map[string]interface{}) {
 	newapp.Generate(options)
 }
 

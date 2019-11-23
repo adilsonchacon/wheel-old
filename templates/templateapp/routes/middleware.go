@@ -6,14 +6,13 @@ var MiddlewareContent = `package routes
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"regexp"
 	"strings"
 	"{{ .AppRepository }}/app/handlers"
 	"{{ .AppRepository }}/app/user"
-	"{{ .AppRepository }}/commons/app/view"
+	"{{ .AppRepository }}/commons/app/handler"
 	"{{ .AppRepository }}/commons/log"
 	"{{ .AppRepository }}/db/entities"
 )
@@ -72,7 +71,10 @@ func checkAdminUser(signedInUser entities.User) bool {
 func checkSignedInUser(userId uint) (entities.User, error) {
 	log.Info.Printf("checking user id: %d...\n", userId)
 
-	if signedInUser, err := user.Find(userId); err == nil {
+  if userId == 0 {
+		log.Info.Println("user is not available")
+		return entities.User{}, errors.New("user is not available")
+  } else if signedInUser, err := user.Find(userId); err == nil {
 		user.SetCurrent(userId)
 		log.Info.Println("user was found")
 		return signedInUser, nil
@@ -84,16 +86,26 @@ func checkSignedInUser(userId uint) (entities.User, error) {
 
 func checkToken(token string) (uint, error) {
 	log.Info.Println("checking token...")
+  
+  if token == "" {
+		log.Info.Println("token was not sent")
+		return 0, nil
+  } else {
+    return validateToken(token)
+  }
+}
 
-	userId, err := handlers.SessionCheck(token)
-
-	if err == nil {
-		log.Info.Println("token is valid")
-		return userId, nil
-	} else {
-		log.Info.Println("invalid token")
-		return 0, errors.New("invalid token")
-	}
+func validateToken(token string) (uint, error) {
+	log.Info.Println("validating token...")
+  
+  userId, err := handlers.SessionCheck(token)
+  if err == nil {
+	  log.Info.Println("token is valid")
+	  return userId, nil
+  } else {
+	  log.Info.Println("invalid token")
+	  return 0, errors.New("invalid token")
+  }
 }
 
 func filterParamsValues(queries map[string][]string) map[string][]string {

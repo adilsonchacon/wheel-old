@@ -110,11 +110,12 @@ func Paginate(criteria map[string]string, order string, page interface{}, perPag
 	var {{ .EntityName.LowerCamelCasePlural }} []entities.{{ .EntityName.CamelCase }}
 	var {{ .EntityName.LowerCamelCase }} entities.{{ .EntityName.CamelCase }}
 
-	db := searchengine.Query(&{{ .EntityName.LowerCamelCase }}, criteria)
-	db = ordering.Query(db, order)
-	db, currentPage, totalPages, totalEntries := pagination.Query(db, &{{ .EntityName.LowerCamelCase }}, page, perPage)
+	db := model.Statement{Query: model.Db, Table: &{{ .EntityName.LowerCamelCase }}}
+	db.SearchEngine(criteria)
+	db.Ordering(order)
+	currentPage, totalPages, totalEntries := db.Pagination(page, perPage)
 
-	db.Find(&{{ .EntityName.LowerCamelCasePlural }})
+	db.Query.Find(&{{ .EntityName.LowerCamelCasePlural }})
 
 	return {{ .EntityName.LowerCamelCasePlural }}, currentPage, totalPages, totalEntries
 }

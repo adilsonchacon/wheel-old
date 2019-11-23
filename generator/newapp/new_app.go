@@ -10,9 +10,6 @@ import (
 	"github.com/adilsonchacon/wheel/templates/templateapp/app/usertemplate"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/handler"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/model"
-	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/model/ordering"
-	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/model/pagination"
-	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/model/searchengine"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/app/view"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/conversor"
 	"github.com/adilsonchacon/wheel/templates/templateapp/commons/crypto"
@@ -33,14 +30,14 @@ func prependRootAppPathToPath(path []string) []string {
 	return append([]string{rootAppPath}, path...)
 }
 
-func Generate(options map[string]string) {
+func Generate(options map[string]interface{}) {
 	// Main vars
 	templateVar = gencommon.TemplateVar{
-		AppName:       options["app_name"],
-		AppRepository: options["app_repository"],
+		AppName:       options["app_name"].(string),
+		AppRepository: options["app_repository"].(string),
 		SecretKey:     gencommon.SecureRandom(128),
 	}
-	rootAppPath = gencommon.BuildRootAppPath(options["app_repository"])
+	rootAppPath = gencommon.BuildRootAppPath(options["app_repository"].(string))
 
 	// APP Root path
 	gencommon.CreateRootAppPath(rootAppPath)
@@ -68,9 +65,9 @@ func Generate(options map[string]string) {
 	// COMMONS APPs
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(handler.Path), handler.Content, templateVar)
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(model.Path), model.Content, templateVar)
-	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(ordering.Path), ordering.Content, templateVar)
-	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(pagination.Path), pagination.Content, templateVar)
-	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(searchengine.Path), searchengine.Content, templateVar)
+	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(model.OrderingPath), model.OrderingContent, templateVar)
+	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(model.PaginationPath), model.PaginationContent, templateVar)
+	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(model.SearchEnginePath), model.SearchEngineContent, templateVar)
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(view.Path), view.Content, templateVar)
 
 	// COMMONS conversor
@@ -113,6 +110,9 @@ func Generate(options map[string]string) {
 
 	// main
 	gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(templates.MainPath), templates.MainContent, templateVar)
+	if options["git_ignore"].(bool) {
+		gencommon.GeneratePathAndFileFromTemplateString(prependRootAppPathToPath(templates.GitIgnorePath), templates.GitIgnoreContent, templateVar)
+	}
 
 	// Final
 	gencommon.NotifyNewApp(rootAppPath)

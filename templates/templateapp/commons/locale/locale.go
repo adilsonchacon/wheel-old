@@ -5,35 +5,27 @@ var Path = []string{"commons", "locale", "locale.go"}
 var Content = `package locale
 
 import (
+	"github.com/adilsonchacon/catalog/commons/log"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"{{ .AppRepository }}/commons/log"
 )
 
 type Keys struct {
-	Welcome                        string
-	Password_recovery_instructions string
+	Welcome                      string ` + "`" + `yaml:"welcome"` + "`" + `
+	PasswordRecoveryInstructions string ` + "`" + `yaml:"password_recovery_instructions"` + "`" + `
 }
 
-var locales Keys
+var I18n Keys
 
-func Welcome() string {
-	return locales.Welcome
-}
-
-func PasswordRecoveryInstructions() string {
-	return locales.Password_recovery_instructions
-}
-
-func Load(language string) {
-	err := yaml.Unmarshal(readLocaleFile(language), &locales)
+func Load(locale string) {
+	err := yaml.Unmarshal(readLocaleFile(locale), &I18n)
 	if err != nil {
-		log.Error.Fatalf("error: %v", err)
+		log.Error.Fatal(err)
 	}
 }
 
-func readLocaleFile(language string) []byte {
-	data, err := ioutil.ReadFile("./config/locales/" + language + ".yml")
+func readLocaleFile(locale string) []byte {
+	data, err := ioutil.ReadFile("./config/locales/" + locale + ".yml")
 	if err != nil {
 		log.Error.Fatal(err)
 	}

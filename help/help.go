@@ -16,10 +16,11 @@ Usage:
                                            # When a handler "attributes" are functions inside handler.
                                            
 Options:
-  -R, [--skip-default-resources]           # Skip default resources
   -G, [--skip-git]                         # Skip .gitignore file
 
 More:
   -h, [--help]                             # Show this help message and quit
   -v, [--version]                          # Show Wheel version number and quit
 `
+
+//   -R, [--skip-default-resources]           # Skip default resources

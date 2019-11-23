@@ -180,11 +180,12 @@ func Paginate(criteria map[string]string, order string, page interface{}, perPag
 	var users []entities.User
 	var user entities.User
 
-	db := searchengine.Query(&user, criteria)
-	db = ordering.Query(db, order)
-	db, currentPage, totalPages, totalEntries := pagination.Query(db, &user, page, perPage)
+	q := model.Query{Db: model.Db, Table: &user}
+	q.SearchEngine(criteria)
+	q.Ordering(order)
+	currentPage, totalPages, totalEntries := q.Pagination(page, perPage)
 
-	db.Find(&users, "deleted_at IS NULL")
+	q.Db.Find(&users, "deleted_at IS NULL")
 
 	return users, currentPage, totalPages, totalEntries
 }

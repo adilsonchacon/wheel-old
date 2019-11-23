@@ -1,37 +1,35 @@
-package pagination
+package model
 
-var Path = []string{"commons", "app", "model", "pagination", "pagination.go"}
+var PaginationPath = []string{"commons", "app", "model", "pagination.go"}
 
-var Content = `package pagination
+var PaginationContent = `package model
 
 import (
-	"{{ .AppRepository }}/commons/app/model"
-	"github.com/jinzhu/gorm"
 	"strconv"
 )
 
-type Counter struct {
-	Entries int
-}
+func (q *Query) Pagination(page interface{}, perPage interface{}) (int, int, int) {
+	type counter struct {
+		Entries int
+	}
 
-func Query(db *gorm.DB, table interface{}, page interface{}, perPage interface{}) (*gorm.DB, int, int, int) {
 	var currentPage, totalPages, entriesPerPage int
-	var counter Counter
+	var result counter
 
 	currentPage = handleCurrentPage(page)
 	entriesPerPage = handleEntriesPerPage(perPage)
 
-	db.Table(model.TableName(table)).Order("", true).Select("COUNT(*) AS entries").Scan(&counter)
+	Db.Table(TableName(q.Table)).Order("", true).Select("COUNT(*) AS entries").Scan(&result)
 
-	totalPages = counter.Entries / entriesPerPage
-	if (counter.Entries % entriesPerPage) > 0 {
+	totalPages = result.Entries / entriesPerPage
+	if (result.Entries % entriesPerPage) > 0 {
 		totalPages++
 	}
 
 	offset := (currentPage - 1) * entriesPerPage
-	db = db.Offset(offset).Limit(entriesPerPage)
+	q.Db = q.Db.Offset(offset).Limit(entriesPerPage)
 
-	return db, currentPage, totalPages, counter.Entries
+	return currentPage, totalPages, result.Entries
 }
 
 func handleCurrentPage(page interface{}) int {

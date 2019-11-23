@@ -17,13 +17,19 @@ import (
 )
 
 var Db *gorm.DB
+
 var Errors []string
+
+type Query struct {
+	Db    *gorm.DB
+	Table interface{}
+}
 
 func Connect() {
 	var err error
 
-	dbCconfig := loadDatabaseConfigFile()
-	Db, err = gorm.Open("postgres", stringfyDatabaseConfigFile(dbCconfig))
+	dbConfig := loadDatabaseConfigFile()
+	Db, err = gorm.Open("postgres", stringfyDatabaseConfigFile(dbConfig))
 
 	if err != nil {
 		log.Fatal.Println(err)
@@ -32,7 +38,7 @@ func Connect() {
 		log.Info.Println("connected to the database successfully")
 	}
 
-	pool, err := strconv.Atoi(dbCconfig["pool"])
+	pool, err := strconv.Atoi(dbConfig["pool"])
 	if err != nil {
 		log.Fatal.Println(err)
 	} else {

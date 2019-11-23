@@ -1,6 +1,7 @@
 package newcrud
 
 import (
+	"github.com/adilsonchacon/wheel/commons/fileutil"
 	"github.com/adilsonchacon/wheel/commons/notify"
 	"github.com/adilsonchacon/wheel/generator/gencommon"
 	"github.com/adilsonchacon/wheel/generator/newauthorize"
@@ -50,7 +51,7 @@ func optionToEntityColumn(options string, isForeignKey bool) gencommon.EntityCol
 
 func setMigrate() {
 	newCode := gencommon.GenerateMigrateNewCode(templatecrud.MigrateContent, templateVar)
-	currentFullCode := gencommon.ReadTextFile(filepath.Join(".", "db", "schema"), "migrate.go")
+	currentFullCode := fileutil.ReadTextFile(filepath.Join(".", "db", "schema"), "migrate.go")
 	newFullCode, err := newmigrate.AppendNewCode(newCode, currentFullCode)
 
 	if err != nil {
@@ -72,7 +73,7 @@ func setRoutes(options map[string]bool) {
 		newCode = gencommon.GenerateRoutesNewCode(templatecrud.RoutesContent, templateVar)
 	}
 
-	currentFullCode := gencommon.ReadTextFile(filepath.Join(".", "routes"), "routes.go")
+	currentFullCode := fileutil.ReadTextFile(filepath.Join(".", "routes"), "routes.go")
 	newFullCode, err := newroutes.AppendNewCode(newCode, currentFullCode)
 
 	if err != nil {
@@ -93,7 +94,7 @@ func setAuthorize(options map[string]bool) {
 		newCode = gencommon.GenerateAuthorizeNewCode(templatecrud.AuthorizeContent, templateVar)
 	}
 
-	currentFullCode := gencommon.ReadTextFile(filepath.Join(".", "routes"), "authorize.go")
+	currentFullCode := fileutil.ReadTextFile(filepath.Join(".", "routes"), "authorize.go")
 	newFullCode, err := newauthorize.AppendNewCode(newCode, currentFullCode)
 
 	if err != nil {
