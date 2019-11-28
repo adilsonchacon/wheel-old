@@ -5,7 +5,7 @@ var SearchEnginePath = []string{"commons", "app", "model", "searchengine.go"}
 var SearchEngineContent = `package model
 
 import (
-	"github.com/adilsonchacon/catalog/commons/log"
+	"{{ .AppRepository }}/commons/log"
 	"regexp"
 	"strconv"
 	"strings"
